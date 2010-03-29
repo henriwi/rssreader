@@ -1,0 +1,9 @@
+moc_*
+*.o
+ui_*
+Makefile*
+*.exe
+*.user
+debug*
+*Release
+*Debug
