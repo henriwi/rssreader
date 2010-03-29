@@ -24,3 +24,13 @@ void MainWindow::changeEvent(QEvent *e)
         break;
     }
 }
+
+void MainWindow::on_addButton_clicked()
+{
+    //add url to database and make it visible in tree view
+}
+
+void MainWindow::on_treeView_clicked(QModelIndex index)
+{
+    //show rss-feed
+}

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QModelIndex>
 
 namespace Ui {
     class MainWindow;
@@ -18,6 +19,11 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+
+
+private slots:
+    void on_treeView_clicked(QModelIndex index);
+    void on_addButton_clicked();
 };
 
 #endif // MAINWINDOW_H
