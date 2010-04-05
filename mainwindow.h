@@ -4,11 +4,16 @@
 #include <QMainWindow>
 #include <QModelIndex>
 
-namespace Ui {
+#include <QSqlQuery>
+#include <QTreeWidgetItem>
+
+namespace Ui
+{
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 public:
     MainWindow(QWidget *parent = 0);
@@ -19,10 +24,19 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    bool createConnection();
+    void setupDatabase();
+    void updateTreeview();
+    void addUrl(QUrl url);
+    void deleteUrl(QUrl url);
+    QSqlQuery *query;
+    QSqlDatabase db;
+
 
 
 private slots:
-    void on_treeView_clicked(QModelIndex index);
+    void on_deleteButton_clicked();
+    void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
     void on_addButton_clicked();
 };
 
