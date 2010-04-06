@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QModelIndex>
-
 #include <QSqlQuery>
 #include <QTreeWidgetItem>
 
@@ -31,8 +30,6 @@ private:
     void deleteUrl(QUrl url);
     QSqlQuery *query;
     QSqlDatabase db;
-
-
 
 private slots:
     void on_deleteButton_clicked();
