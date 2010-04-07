@@ -15,14 +15,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     createConnection();
     xmlParser = new XMLParser;
-
-
 }
 
 MainWindow::~MainWindow()
 {
     db.close();
     delete query;
+    delete xmlParser;
     delete ui;
 }
 
@@ -108,7 +107,6 @@ void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
     query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
-    query->exec("CREATE TABLE IF NOT EXISTS Feed (id INT UNIQUE AUTO_INCREMENT, feed varchar UNIQUE NOT NULL, url varchar NOT NULL, PRIMARY KEY (id), FOREIGN KEY url REFERENCES Url(url))");
 
     updateTreeview();
 }
@@ -117,10 +115,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     ui->urlEdit->setText(item->text(column));
 
-    ui->rssView->load(QUrl(item->text(0)));
-    ui->rssView->show();
-
     //show rss-feed
+    xml.clear();
     url.setUrl(ui->urlEdit->text());
     http.setHost(url.host());
     connectionId = http.get(url.path());
@@ -138,8 +134,7 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         http.abort();
     else {
         xml.addData(http.readAll());
-        QString output = xmlParser->parseXml(&xml, ui->treeWidget, ui->treeWidget->currentItem(), query);
+        QString output = xmlParser->parseXml(&xml);
         ui->rssEdit->setText(output);
-        ui->rssView->setHtml(output);
     }
 }
