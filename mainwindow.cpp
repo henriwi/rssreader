@@ -136,13 +136,12 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         http.abort();
     else {
         xml.addData(http.readAll());
-        QString output = xmlParser->parseXml(&xml);
-        ui->rssEdit->setText(output);
+        QString feed = xmlParser->parseXml(&xml);
+        ui->rssEdit->setText(feed);
     }
 }
 
 void MainWindow::rssLinkedClicked(QUrl url)
 {
-    QUrl* j = new QUrl("http://vg.no");
     QDesktopServices::openUrl(url);
 }
