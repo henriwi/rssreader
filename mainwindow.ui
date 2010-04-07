@@ -181,14 +181,17 @@
      </property>
     </column>
    </widget>
-   <widget class="QTextEdit" name="rssEdit">
+   <widget class="QTextBrowser" name="rssEdit">
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>130</y>
-      <width>671</width>
-      <height>501</height>
+      <y>150</y>
+      <width>661</width>
+      <height>461</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
