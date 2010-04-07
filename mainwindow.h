@@ -43,6 +43,7 @@ private slots:
     void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
     void on_addButton_clicked();
     void readData(const QHttpResponseHeader &);
+    void rssLinkedClicked(QUrl url);
 };
 
 #endif // MAINWINDOW_H

@@ -23,7 +23,7 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
                 output.append(xml->text().toString());
             }
             else if (currentTag == "link") {
-                output.append("<a href=\"xml->text().toString()\">" + xml->text().toString() + "</a>");
+                output.append("<a href='" + xml->text().toString()+ "'>" + xml->text().toString() + "</a>");
             }
         }
     }
