@@ -12,8 +12,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     createConnection();
+    xmlParser = new XMLParser;
+
+
 }
 
 MainWindow::~MainWindow()
@@ -37,7 +40,7 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::on_addButton_clicked()
 {
-    QUrl url(ui->urlEdit->text());
+    url.setUrl(ui->urlEdit->text());
     if (!url.isValid())              //NOT WORKING: accepts all
     {
         ui->urlErrorLabel->setText("Invalid URL: " + url.toString());
@@ -72,14 +75,11 @@ void MainWindow::updateTreeview()
 {
     ui->treeWidget->clear();
 
-    QTreeWidgetItem *widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
-    widgetItemAll->setText(0, "All");
-
     query->exec("SELECT url FROM Url");
 
     while (query->next())
     {
-        QTreeWidgetItem * widgetItem = new QTreeWidgetItem(widgetItemAll);
+        QTreeWidgetItem * widgetItem = new QTreeWidgetItem(ui->treeWidget);
 
         widgetItem->setText(0, query->value(0).toString());
 
@@ -112,17 +112,30 @@ void MainWindow::setupDatabase()
     query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
 
     updateTreeview();
-
 }
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     ui->urlEdit->setText(item->text(column));
     //show rss-feed
+    url.setUrl(ui->urlEdit->text());
+    http.setHost(url.host());
+    connectionId = http.get(url.path());
 }
 
 void MainWindow::on_deleteButton_clicked()
 {
     QUrl url(ui->urlEdit->text());
     deleteUrl(url);
+}
+
+void MainWindow::readData(const QHttpResponseHeader &resp)
+{
+    if (resp.statusCode() != 200)
+        http.abort();
+    else {
+        xml.addData(http.readAll());
+        QString output = xmlParser->parseXml(&xml, ui->treeWidget, ui->treeWidget->currentItem());
+        ui->rssEdit->setHtml(output);
+    }
 }

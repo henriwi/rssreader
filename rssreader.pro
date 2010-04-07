@@ -4,15 +4,17 @@
 #
 #-------------------------------------------------
 
-QT       += network sql xml
+QT       += network sql xml webkit
 
 TARGET = rssreader
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+        xmlparser.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+        xmlparser.h
 
 FORMS    += mainwindow.ui

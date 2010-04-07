@@ -181,6 +181,16 @@
      </property>
     </column>
    </widget>
+   <widget class="QTextEdit" name="rssEdit">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>130</y>
+      <width>671</width>
+      <height>501</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

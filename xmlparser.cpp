@@ -6,22 +6,21 @@ XMLParser::XMLParser(QObject *parent) :
 
 }
 
-QString XMLParser::parseXml(QXmlStreamReader* xml)
+QString XMLParser::parseXml(QXmlStreamReader* xml, QTreeWidget* treeWidget, QTreeWidgetItem* parent)
 {
     QTextEdit output;
-    while(!xml->atEnd()) {
+    while (!xml->atEnd()) {
         xml->readNext();
+        output.append(xml->text().toString());
         if (xml->isStartElement()) {
             if (xml->name() == "item")
                 linkString = xml->attributes().value("rss:about").toString();
-                currentTag = xml->name().toString();
+            currentTag = xml->name().toString();
         } else if (xml->isEndElement()) {
             if (xml->name() == "item") {
-
-                /*QTreeWidgetItem *item = new QTreeWidgetItem;
-                item->setText(0, titleString);
-                item->setText(1, linkString);
-                treeWidget->addTopLevelItem(item);*/
+                QTreeWidgetItem * widgetItem = new QTreeWidgetItem(parent);
+                widgetItem->setText(0, titleString);
+                widgetItem->setText(1, linkString);
 
                 titleString.clear();
                 linkString.clear();
@@ -38,7 +37,5 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
         qWarning() << "XML ERROR:" << xml->lineNumber() << ": " << xml->errorString();
         //http.abort();
     }
-
-    output.append(linkString);
     return output.toPlainText();
 }
