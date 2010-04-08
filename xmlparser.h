@@ -26,4 +26,3 @@ private:
 };
 
 #endif // XMLPARSER_H
->>>>>>> 39206a39052a01ae026ba15afa79a3458ebf0268
