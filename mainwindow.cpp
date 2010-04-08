@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
+    connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
     createConnection();
     xmlParser = new XMLParser;
 }
@@ -72,6 +73,7 @@ void MainWindow::deleteUrl(QUrl stringUrl)
     query->bindValue(":stringUrl", stringUrl);
     query->exec();
 
+    ui->rssEdit->clear();
     updateTreeview();
     ui->urlEdit->clear();
     ui->rssEdit->clear();
@@ -135,7 +137,12 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         http.abort();
     else {
         xml.addData(http.readAll());
-        QString output = xmlParser->parseXml(&xml);
-        ui->rssEdit->setText(output);
+        QString feed = xmlParser->parseXml(&xml);
+        ui->rssEdit->setText(feed);
     }
+}
+
+void MainWindow::rssLinkedClicked(QUrl url)
+{
+    QDesktopServices::openUrl(url);
 }

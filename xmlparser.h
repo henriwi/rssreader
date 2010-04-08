@@ -1,3 +1,4 @@
+
 #ifndef XMLPARSER_H
 #define XMLPARSER_H
 
@@ -5,6 +6,7 @@
 #include <QXmlStreamReader>
 #include <QtGui>
 #include <QSqlQuery>
+#include "feed.h"
 
 class XMLParser : public QObject
 {
@@ -19,6 +21,9 @@ public slots:
 
 private:
     QString currentTag;
+    QLinkedList<Feed> feeds;
+
 };
 
 #endif // XMLPARSER_H
+>>>>>>> 39206a39052a01ae026ba15afa79a3458ebf0268
