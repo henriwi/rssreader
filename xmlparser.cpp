@@ -24,6 +24,7 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
             }
             else if (currentTag == "link") {
                 output.append("<a href=\"xml->text().toString()\">" + xml->text().toString() + "</a>");
+                //QTextBrowser: No document for xml->text().toString() feil ved trykking på link
             }
         }
     }

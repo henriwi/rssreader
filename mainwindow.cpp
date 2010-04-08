@@ -60,6 +60,12 @@ void MainWindow::addUrl(QUrl stringUrl)
     ui->urlEdit->clear();
 }
 
+void MainWindow::on_deleteButton_clicked()
+{
+    QUrl url(ui->urlEdit->text());
+    deleteUrl(url);
+}
+
 void MainWindow::deleteUrl(QUrl stringUrl)
 {
     query->prepare("DELETE FROM Url WHERE url=:stringUrl" );
@@ -68,6 +74,7 @@ void MainWindow::deleteUrl(QUrl stringUrl)
 
     updateTreeview();
     ui->urlEdit->clear();
+    ui->rssEdit->clear();
 }
 
 void MainWindow::updateTreeview()
@@ -120,12 +127,6 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
     url.setUrl(ui->urlEdit->text());
     http.setHost(url.host());
     connectionId = http.get(url.path());
-}
-
-void MainWindow::on_deleteButton_clicked()
-{
-    QUrl url(ui->urlEdit->text());
-    deleteUrl(url);
 }
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
