@@ -8,8 +8,6 @@ XMLParser::XMLParser(QObject *parent) :
 
 QString XMLParser::parseXml(QXmlStreamReader* xml)
 {
-    // Dette er en test
-    // En ny kommentar!
     QTextEdit output;
     while (!xml->atEnd()) {
         Feed feed;
