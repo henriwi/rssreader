@@ -9,6 +9,7 @@ XMLParser::XMLParser(QObject *parent) :
 
 QString XMLParser::parseXml(QXmlStreamReader* xml)
 {
+    // Dette er en test
     QTextEdit output;
     while (!xml->atEnd()) {
         Feed feed;
@@ -39,5 +40,3 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
     }*/
     return output.toHtml();
 }
-
->>>>>>> 39206a39052a01ae026ba15afa79a3458ebf0268
