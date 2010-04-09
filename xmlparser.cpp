@@ -37,6 +37,9 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
                     else if (currentTag == "link") {
                         feed.setLink("<a href='" + xml->text().toString()+ "'>" + xml->text().toString() + "</a>");
                     }
+                    else if (currentTag == "pubDate") {
+                        feed.setDate(xml->text().toString());
+                    }
                 }
             }
             endElement = "";

@@ -27,6 +27,11 @@ QString Feed::link()
     return _link;
 }
 
+QString Feed::date()
+{
+    return _date;
+}
+
 void Feed::setTitle(QString title)
 {
     this->_title = title;
@@ -42,7 +47,12 @@ void Feed::setLink(QString link)
     this->_link = link;
 }
 
+void Feed::setDate(QString date)
+{
+    this->_date = date;
+}
+
 QString Feed::toString()
 {
-    return _title + _content + "<p>" + _link + "</p>";
+    return _title + "<p>" + _date + "</p>" + _content + "<p>" + _link + "</p>";
 }

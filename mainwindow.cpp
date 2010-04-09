@@ -157,6 +157,6 @@ void MainWindow::finished(int id, bool error)
 
     }
     else if (id == connectionId) {
-        //ui->rssEdit->
+        ui->searchButton->setEnabled(true);
     }
 }
