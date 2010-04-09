@@ -5,6 +5,13 @@ Feed::Feed()
 
 }
 
+Feed::Feed(QString title, QString content, QString link)
+{
+    this->_title = title;
+    this->_content = content;
+    this->_link = link;
+}
+
 QString Feed::title()
 {
     return _title;
@@ -37,5 +44,5 @@ void Feed::setLink(QString link)
 
 QString Feed::toString()
 {
-    return _title + _content + _link;
+    return _title + _content + "<p>" + _link + "</p>";
 }

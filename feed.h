@@ -7,7 +7,8 @@
 class Feed
 {
 public:
-    explicit Feed();
+    Feed();
+    Feed(QString title, QString content, QString link);
     QString title();
     QString content();
     QString link();
