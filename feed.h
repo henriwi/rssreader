@@ -7,13 +7,16 @@
 class Feed
 {
 public:
-    explicit Feed();
+    Feed();
+    Feed(QString title, QString content, QString link);
     QString title();
     QString content();
     QString link();
+    QString date();
     void setTitle(QString title);
     void setContent(QString content);
     void setLink(QString link);
+    void setDate(QString date);
     QString toString();
 
 signals:
@@ -24,6 +27,7 @@ private:
     QString _title;
     QString _content;
     QString _link;
+    QString _date;
 
 };
 

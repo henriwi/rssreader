@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
+    connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
     createConnection();
     xmlParser = new XMLParser;
@@ -139,8 +140,10 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
     ui->urlEdit->setText(item->text(column));
 
     //show rss-feed
+    ui->rssEdit->clear();
     xml.clear();
     url.setUrl(ui->urlEdit->text());
+    ui->searchButton->setDisabled(true);
     http.setHost(url.host());
     connectionId = http.get(url.path());
 }
@@ -151,12 +154,23 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         http.abort();
     else {
         xml.addData(http.readAll());
-        QString feed = xmlParser->parseXml(&xml);
-        ui->rssEdit->setText(feed);
+        feed = xmlParser->parseXml(&xml);
+        ui->rssEdit->append(feed);
     }
 }
 
 void MainWindow::rssLinkedClicked(QUrl url)
 {
     QDesktopServices::openUrl(url);
+}
+
+void MainWindow::finished(int id, bool error)
+{
+    if (error) {
+        qWarning("Received error during HTTP fetch.");
+
+    }
+    else if (id == connectionId) {
+        ui->searchButton->setEnabled(true);
+    }
 }

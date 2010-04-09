@@ -38,6 +38,7 @@ private:
     QXmlStreamReader xml;
     int connectionId;
     QUrl url;
+    QString feed;
 
 private slots:
     void on_deleteButton_clicked();
@@ -45,6 +46,7 @@ private slots:
     void on_addButton_clicked();
     void readData(const QHttpResponseHeader &);
     void rssLinkedClicked(QUrl url);
+    void finished(int id, bool error);
 };
 
 #endif // MAINWINDOW_H
