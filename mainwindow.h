@@ -30,6 +30,7 @@ private:
     void updateTreeview();
     void addUrl(QUrl url);
     void deleteUrl(QUrl url);
+    bool validUrl(QString url);
     QSqlQuery *query;
     QSqlDatabase db;
     XMLParser* xmlParser;

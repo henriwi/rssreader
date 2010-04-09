@@ -41,7 +41,7 @@ void MainWindow::changeEvent(QEvent *e)
 void MainWindow::on_addButton_clicked()
 {
     url.setUrl(ui->urlEdit->text());
-    if (!url.isValid())              //NOT WORKING: accepts all
+    if (!validUrl(url.toString()))              //NOT WORKING: accepts all
     {
         ui->urlErrorLabel->setText("Invalid URL: " + url.toString());
     }
@@ -49,6 +49,20 @@ void MainWindow::on_addButton_clicked()
     {
         addUrl(url);
     }
+}
+
+bool MainWindow::validUrl(QString stringUrl)
+{
+    //QRegExp validUrlRegex("^(http|https)://[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(([0-9]{1,5})?/?.*)$");
+    //QRegExp validUrlRegex ("^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$");
+    //QRegExp validUrlRegex ("^http(s)?:\/\/((\d+\.\d+\.\d+\.\d+)|(([\w-]+\.)+([a-z,A-Z][\w-]*)))(:[1-9][0-9]*)?(\/([\w-.\/:%+@&=]+[\w- .\/?:%+@&=]*)?)?(#(.*))?$");
+    QRegExp validUrlRegex ("(https?://|www\\.)[\\w\\-]+(\\.[\\w\\-]+)*([^>\"\\s\\[\\]\\)])*");
+
+
+    //if (validURLRegex.exactMatch(StringUrl))
+    if (validUrlRegex.exactMatch(stringUrl))
+        return true;
+    return false;
 }
 
 void MainWindow::addUrl(QUrl stringUrl)
