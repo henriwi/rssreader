@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
     quitAction = new QAction(tr("Quit"), this);
 
-    setWindowIcon(QIcon(":/img/rssIcon.png"));
+    setWindowIcon(QIcon(":/img/windowIcon.png"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     trayIconMenu = new QMenu(this);
@@ -38,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
     timer->start(300000);          //Updates every 5 minutes
+
+    //setWindowState(Qt::WindowMaximized);
 }
 
 MainWindow::~MainWindow()
@@ -47,7 +49,6 @@ MainWindow::~MainWindow()
     delete timer;
     delete xmlParser;
     delete ui;
-
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -243,11 +244,11 @@ void MainWindow::on_searchButton_clicked()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (trayIcon->isVisible()) {
-        QMessageBox::information(this, tr("Systray"),
+        QMessageBox::information(this, tr("Systemtray information"),
                                  tr("The program will keep running in the "
                                     "system tray. To terminate the program, "
                                     "right click on the system tray icon and "
-                                    "choose<b>Quit</b>."));
+                                    "choose <b>Quit</b>."));
         hide();
         event->ignore();
     }

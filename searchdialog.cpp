@@ -3,7 +3,7 @@
 SearchDialog::SearchDialog(QWidget *parent, QString query) :
     QDialog(parent)
 {
-    setWindowTitle(tr("Search for feeds"));
+    setWindowTitle(tr("Search after feeds"));
     view = new QWebView;
     searchResult = new QTextBrowser;
     searchInput = new QLineEdit;
@@ -18,6 +18,7 @@ SearchDialog::SearchDialog(QWidget *parent, QString query) :
     layout->addWidget(messageLabel, 1, 0);
     layout->addWidget(searchResult, 2, 0);
     setLayout(layout);
+    setMinimumSize(500, 500);
 
     searchUrl.setUrl(SEARCH_URL);
     searchUrl.addQueryItem("q", query);
@@ -46,19 +47,29 @@ void SearchDialog::showSearchResults(bool ok)
 {
     if(ok) {
         QTextEdit output;
-        QWebElementCollection elements = view->page()->mainFrame()->findAllElements("a[style='color: green;']");
+        QWebElementCollection elements = view->page()->mainFrame()->findAllElements("div[id=results]");
 
-        foreach (QWebElement paraElement, elements) {
-            output.append("<a href='" + paraElement.toPlainText() + "'>" + paraElement.toPlainText() + "</a>");
+        foreach (QWebElement results, elements) {
+            QWebElement header = results.firstChild();
+            QWebElement linkDiv = header.nextSibling();
+            QWebElement feedLink = linkDiv.firstChild();
+            QWebElement description = linkDiv.nextSibling();
+
+            // feedLink is empty if there are no results
+            if(feedLink.toPlainText() != "") {
+                output.append("<h4>" + header.toPlainText() + "</h4>");
+                output.append("<p style=\"font-style: italic\">" + description.toPlainText() + "</p>");
+                output.append("<a href='" + feedLink.toPlainText() + "'>" + tr("Add feed") + "</a>");
+            }
         }
-
-        searchResult->setHtml(output.toHtml());
 
         if(output.toPlainText() != "") {
             messageLabel->setText(tr("Results for \"%1\":").arg(searchInput->text()));
+            searchResult->setHtml(output.toHtml());
         }
         else {
             messageLabel->setText(tr("No results found for \"%1\"").arg(searchInput->text()));
+            searchResult->clear();
         }
     }
     else {
