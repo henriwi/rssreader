@@ -1,3 +1,4 @@
+
 #ifndef SEARCHDIALOG_H
 #define SEARCHDIALOG_H
 

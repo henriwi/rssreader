@@ -1,3 +1,4 @@
+
 #include "searchdialog.h"
 
 SearchDialog::SearchDialog(QWidget *parent, QString query) :

@@ -8,7 +8,7 @@ XMLParser::XMLParser(QObject *parent) :
 
 }
 
-QString XMLParser::parseXml(QXmlStreamReader* xml)
+void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
 {
     QString title = "";
     QString content = "";
@@ -42,9 +42,14 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
         }
     }
 
-    QTextEdit output;
-    while(!feeds.isEmpty()) {
-        output.append(feeds.takeFirst().toString());
+    foreach(Feed feed, feeds) {
+        query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
+        query->bindValue(":stringUrl", url->toString());
+        query->bindValue(":stringTitle", feed.title());
+        query->bindValue(":stringContent", feed.content());
+        query->bindValue(":stringDate", feed.date());
+        query->bindValue(":stringLink", feed.link());
+        query->bindValue(":boolUnread", true);
+        query->exec();
     }
-    return output.toHtml();
 }

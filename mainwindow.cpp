@@ -18,11 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
-    //connect(ui->actionUpdate_RSS_now, SIGNAL (activated()), this, SLOT (updateRss()));
+    connect (ui->actionUpdate_RSS_feed, SIGNAL (activated()), this, SLOT (updateRss()));
     createConnection();
-    createActions();
     xmlParser = new XMLParser;
-
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
     trayIcon->show();
@@ -42,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer->start(300000);          //Updates every 5 minutes
 
     //setWindowState(Qt::WindowMaximized);
+
 }
 
 MainWindow::~MainWindow()
@@ -67,12 +66,16 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
  {
-    QPoint globalPos = ui->treeWidget->mapToGlobal(event->pos());
-    menu = new QMenu(this);
-    menu->addAction(updateAct);
-    menu->addAction(deleteAct);
-    //menu->exec(event->globalPos());
-    menu->exec(globalPos);      //funker ikke
+    QPoint globalPos = ui->treeWidget->mapToGlobal(event->globalPos());
+    if (ui->treeWidget->itemAt(event->pos()))
+    {
+        menu = new QMenu(this);
+        menu->addAction(updateAct);
+        menu->addAction(deleteAct);
+        //menu->exec(event->globalPos());
+        menu->exec(globalPos);
+    }
+
  }
 
 void MainWindow::createActions()
@@ -83,7 +86,7 @@ void MainWindow::createActions()
 
     updateAct = new QAction (tr("&Update"), this);
     updateAct->setStatusTip(tr("Update URL"));
-    connect (updateAct, SIGNAL (Triggered()), this, SLOT (updateRss()));
+    connect (updateAct, SIGNAL (triggered()), this, SLOT (updateRss()));
 }
 
 void MainWindow::on_addButton_clicked()
@@ -115,12 +118,14 @@ bool MainWindow::validUrl(QString stringUrl)
 
 void MainWindow::addUrl(QUrl stringUrl)
 {
-    query->prepare("INSERT INTO Url (url) VALUES (:stringUrl)");
-    query->bindValue(":stringUrl", stringUrl);
-    query->exec();
+    ui->rssEdit->clear();
+    xml.clear();
+    url.setUrl(stringUrl.toString());
+    ui->searchButton->setDisabled(true);
+    http.setHost(url.host());
+    connectionId = http.get(url.path());
 
     updateTreeview();
-    ui->urlEdit->clear();
 }
 
 void MainWindow::on_deleteButton_clicked()
@@ -131,20 +136,21 @@ void MainWindow::on_deleteButton_clicked()
 
 void MainWindow::deleteUrl(QUrl stringUrl)
 {
-    query->prepare("DELETE FROM Url WHERE url=:stringUrl" );
+    query->prepare("DELETE FROM Feed WHERE url=:stringUrl" );
     query->bindValue(":stringUrl", stringUrl);
     query->exec();
 
-    //ui->rssEdit->clear();
+    ui->rssEdit->clear();
     updateTreeview();
     ui->urlEdit->clear();
+    ui->rssEdit->clear();
 }
 
 void MainWindow::updateTreeview()
 {
     ui->treeWidget->clear();
 
-    query->exec("SELECT url FROM Url");
+    query->exec("SELECT DISTINCT url FROM Feed");
 
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
     widgetItemAll->setText(0, "All");
@@ -155,6 +161,7 @@ void MainWindow::updateTreeview()
         widgetItem->setText(0, query->value(0).toString());
     }
     ui->treeWidget->expandAll();
+
 }
 
 bool MainWindow::createConnection()
@@ -179,14 +186,14 @@ bool MainWindow::createConnection()
 void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
-    query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
-
+    //query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
+    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
 void MainWindow::updateRss()
 {
-    if (!ui->urlEdit->text().isEmpty())
+    /*if (!ui->urlEdit->text().isEmpty())
     {
         ui->rssEdit->clear();
         xml.clear();
@@ -194,27 +201,56 @@ void MainWindow::updateRss()
         ui->searchButton->setDisabled(true);
         http.setHost(url.host());
         connectionId = http.get(url.path());
-    }
+    }*/
 }
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     ui->urlEdit->setText(item->text(column));
+    ui->rssEdit->clear();
+    if (item->text(column) == "All")
+    {
+        query->exec("SELECT title, date, content, link FROM Feed ORDER BY date");           //Date er ikke formatert rett for dette
+        while (query->next())
+        {
+            ui->rssEdit->append(query->value(0).toString());
+            ui->rssEdit->append(query->value(1).toString());
+            ui->rssEdit->append(query->value(2).toString());
+            ui->rssEdit->append(query->value(3).toString());
+        }
+
+    }
+    else
+    {
+        query->prepare("SELECT title, date, content, link FROM Feed WHERE url = :url");
+        query->bindValue(":url", ui->urlEdit->text());
+        query->exec();
+
+        while (query->next())
+        {
+            ui->rssEdit->append(query->value(0).toString());
+            ui->rssEdit->append(query->value(1).toString());
+            ui->rssEdit->append(query->value(2).toString());
+            ui->rssEdit->append(query->value(3).toString());
+        }
+    }
+    /*QTextCursor c = ui->rssEdit->textCursor();
+    c.movePosition(QTextCursor::Start);
+    ui->rssEdit->setTextCursor(c);*/
     updateRss();
 }
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
 {
+    url.setUrl(ui->urlEdit->text());
+
     if (resp.statusCode() != 200)
         http.abort();
     else {
         xml.addData(http.readAll());
-        feed = xmlParser->parseXml(&xml);
-        ui->rssEdit->append(feed);
-        QTextCursor c = ui->rssEdit->textCursor();
-        c.movePosition(QTextCursor::Start);
-        ui->rssEdit->setTextCursor(c);
-    }
+        xmlParser->parseXml(&xml, query, &url);
+    }    
+    updateTreeview();
 }
 
 void MainWindow::rssLinkedClicked(QUrl url)
@@ -239,6 +275,7 @@ void MainWindow::on_searchButton_clicked()
 
     if(searchdialog.exec() == QDialog::Accepted) {
         QUrl url = searchdialog.feedUrl();
+        ui->urlEdit->setText(url.toString());
         addUrl(url);
     }
 }
@@ -264,3 +301,4 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
         break;
     }
 }
+
