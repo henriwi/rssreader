@@ -14,11 +14,22 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
     QString content = "";
     QString date = "";
     QString link = "";
+    QString endTag = "";
 
     while (!xml->atEnd()) {
         xml->readNext();
         if (xml->isStartElement()) {
             currentTag = xml->name().toString();
+        }
+        else if (xml->isEndElement()) {
+            if(xml->name() == "item") {
+                Feed feed(title, content, link, date);
+                feeds.append(feed);
+                title.clear();
+                content.clear();
+                date.clear();
+                link.clear();
+            }
         }
         else if(xml->isCharacters() && !xml->isWhitespace()) {
             if (currentTag == "title") {
@@ -33,14 +44,6 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
             else if (currentTag == "pubDate" || currentTag == "date") {
                 date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
             }
-        }
-        if(title != "" && content != "" && date != "" && link != ""){
-            Feed feed(title, content, link, date);
-            feeds.append(feed);
-            title = "";
-            content = "";
-            date = "";
-            link = "";
         }
     }
 

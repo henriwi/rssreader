@@ -201,8 +201,6 @@ void MainWindow::updateRss()
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     ui->urlEdit->setText(item->text(column));
-
-    //show rss-feed
     updateRss();
 }
 
