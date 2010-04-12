@@ -12,7 +12,7 @@ SearchDialog::SearchDialog(QWidget *parent, QString query) :
     searchButton->setText("Search");
     messageLabel = new QLabel;
 
-    QGridLayout* layout = new QGridLayout;
+    layout = new QGridLayout;
     layout->addWidget(searchInput, 0, 0);
     layout->addWidget(searchButton, 0, 1);
     layout->addWidget(messageLabel, 1, 0);
@@ -36,6 +36,17 @@ SearchDialog::SearchDialog(QWidget *parent, QString query) :
     progressDialog->setValue(0);
 
     view->load(searchUrl);
+}
+
+SearchDialog::~SearchDialog()
+{
+    delete view;
+    delete progressDialog;
+    delete searchResult;
+    delete searchInput;
+    delete searchButton;
+    delete messageLabel;
+    delete layout;
 }
 
 QUrl SearchDialog::feedUrl()

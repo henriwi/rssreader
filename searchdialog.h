@@ -18,6 +18,7 @@ class SearchDialog : public QDialog
 Q_OBJECT
 public:
     SearchDialog(QWidget *parent = 0, QString query = "");
+    ~SearchDialog();
     QUrl feedUrl();
 
 signals:
@@ -39,7 +40,7 @@ private:
     QPushButton* searchButton;
     QLabel* messageLabel;
     QUrl _feedUrl;
-
+    QGridLayout* layout;
 };
 
 #endif // SEARCHDIALOG_H
