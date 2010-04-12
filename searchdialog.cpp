@@ -10,7 +10,7 @@ SearchDialog::SearchDialog(QWidget *parent, QString query) :
     searchInput->setText(query);
     searchButton = new QPushButton;
     searchButton->setText("Search");
-    messageLabel = new QLabel("Results for \"" + query + "\":");
+    messageLabel = new QLabel;
 
     QGridLayout* layout = new QGridLayout;
     layout->addWidget(searchInput, 0, 0);
@@ -27,7 +27,8 @@ SearchDialog::SearchDialog(QWidget *parent, QString query) :
     connect(view, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
     connect(view, SIGNAL(loadFinished(bool)), this, SLOT(showSearchResults(bool)));
 
-    progressDialog = new QProgressDialog("Searching...", "Abort", 0, 100, this);
+    progressDialog = new QProgressDialog(tr("Searching after feeds..."), tr("Abort"), 0, 100, this);
+    progressDialog->setWindowTitle(tr("Searching"));
     progressDialog->setMinimum(0);
     progressDialog->setMaximum(100);
     progressDialog->setWindowModality(Qt::WindowModal);
@@ -46,13 +47,22 @@ void SearchDialog::showSearchResults(bool ok)
     if(ok) {
         QTextEdit output;
         QWebElementCollection elements = view->page()->mainFrame()->findAllElements("a[style='color: green;']");
+
         foreach (QWebElement paraElement, elements) {
             output.append("<a href='" + paraElement.toPlainText() + "'>" + paraElement.toPlainText() + "</a>");
         }
+
         searchResult->setHtml(output.toHtml());
+
+        if(output.toPlainText() != "") {
+            messageLabel->setText(tr("Results for \"%1\":").arg(searchInput->text()));
+        }
+        else {
+            messageLabel->setText(tr("No results found for \"%1\"").arg(searchInput->text()));
+        }
     }
     else {
-        QMessageBox::warning(this, "Searcherror", "Was not able to perform the search. Please try again.",
+        QMessageBox::warning(this, tr("Searcherror"), tr("Was not able to perform the search. Please try again."),
                              QMessageBox::Ok);
     }
 }

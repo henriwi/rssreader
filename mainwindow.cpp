@@ -16,17 +16,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
-    connect (ui->actionUpdate_RSS_now, SIGNAL (activated()), this, SLOT (updateRss()));
+    //connect(ui->actionUpdate_RSS_now, SIGNAL (activated()), this, SLOT (updateRss()));
     createConnection();
     createActions();
     xmlParser = new XMLParser;
 
     trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(QIcon(":/img/trayIcon.gif"));
+    trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
     quitAction = new QAction(tr("Quit"), this);
+
+    setWindowIcon(QIcon(":/img/rssIcon.png"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     trayIconMenu = new QMenu(this);
@@ -244,8 +246,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
         QMessageBox::information(this, tr("Systray"),
                                  tr("The program will keep running in the "
                                     "system tray. To terminate the program, "
-                                    "choose <b>Quit</b> in the context menu "
-                                    "of the system tray entry."));
+                                    "right click on the system tray icon and "
+                                    "choose<b>Quit</b>."));
         hide();
         event->ignore();
     }
