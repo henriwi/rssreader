@@ -3,76 +3,53 @@
 using namespace std;
 
 XMLParser::XMLParser(QObject *parent) :
-    QObject(parent)
+        QObject(parent)
 {
 
 }
 
 void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
 {
-    QString endElement = "";
+    QString title = "";
+    QString content = "";
+    QString date = "";
+    QString link = "";
+
     while (!xml->atEnd()) {
         xml->readNext();
         if (xml->isStartElement()) {
             currentTag = xml->name().toString();
         }
-        if (currentTag == "item") {
-            Feed feed;
-            int i = 0;
-            while (i++ < 20 /*endElement != "item"*/) {
-                xml->readNext();
-                if(xml->isStartElement()) {
-                    currentTag = xml->name().toString();
-                }
-                else if(xml->isEndElement()) {
-                    endElement = xml->name().toString();
-                }
-                else if(xml->isCharacters() && !xml->isWhitespace()) {
-                    if (currentTag == "title") {
-                        feed.setTitle("<h3>" + xml->text().toString() + "</h3>");
-                    }
-                    else if(currentTag == "description") {
-                        feed.setContent(xml->text().toString());
-                    }
-                    else if (currentTag == "link") {
-                        feed.setLink("<a href='" + xml->text().toString()+ "'>" + xml->text().toString() + "</a>");
-                    }
-                    else if (currentTag == "pubDate") {
-                        feed.setDate(xml->text().toString());
-                    }
-                }
+        else if (xml->isEndElement()) {
+            if(xml->name() == "item") {
+                Feed feed(title, content, link, date);
+                feeds.append(feed);
             }
-            endElement = "";
-
-
-            //query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
-
-            query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
-            query->bindValue(":stringUrl", url->toString());
-            query->bindValue(":stringTitle", feed.title());
-            query->bindValue(":stringContent", feed.content());
-            query->bindValue(":stringDate", feed.date());
-            query->bindValue(":stringLink", feed.link());
-            query->bindValue(":boolUnread", true);
-            query->exec();
-
-            //Working
-            /*query->prepare("INSERT INTO Url (url) VALUES (:stringUrl)");
-            query->bindValue(":stringUrl", url->toString());
-            query->exec();*/
-
-
-            //feeds.append(feed);
-
-            
+        }
+        else if(xml->isCharacters() && !xml->isWhitespace()) {
+            if (currentTag == "title") {
+                title = "<h3 style=\"color: #363636;\">" + xml->text().toString() + "</h3>";
+            }
+            else if(currentTag == "description") {
+                content = xml->text().toString();
+            }
+            else if (currentTag == "link") {
+                link = "<a href='" + xml->text().toString()+ "'>" + tr("Read more here") + "</a>";
+            }
+            else if (currentTag == "pubDate" || currentTag == "date") {
+                date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
+            }
         }
     }
 
-    
-    /*QTextEdit output;
-    while(!feeds.isEmpty()) {
-        output.append(feeds.takeFirst().toString());
+    foreach(Feed feed, feeds) {
+        query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
+        query->bindValue(":stringUrl", url->toString());
+        query->bindValue(":stringTitle", feed.title());
+        query->bindValue(":stringContent", feed.content());
+        query->bindValue(":stringDate", feed.date());
+        query->bindValue(":stringLink", feed.link());
+        query->bindValue(":boolUnread", true);
+        query->exec();
     }
-    return output.toHtml();*/
 }
-

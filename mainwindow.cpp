@@ -202,7 +202,6 @@ void MainWindow::updateRss()
         http.setHost(url.host());
         connectionId = http.get(url.path());
     }*/
-
 }
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
@@ -235,6 +234,9 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
             ui->rssEdit->append(query->value(3).toString());
         }
     }
+    /*QTextCursor c = ui->rssEdit->textCursor();
+    c.movePosition(QTextCursor::Start);
+    ui->rssEdit->setTextCursor(c);*/
     updateRss();
 }
 

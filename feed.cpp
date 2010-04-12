@@ -5,11 +5,12 @@ Feed::Feed()
 
 }
 
-Feed::Feed(QString title, QString content, QString link)
+Feed::Feed(QString title, QString content, QString link, QString date)
 {
     this->_title = title;
     this->_content = content;
     this->_link = link;
+    this->_date = date;
 }
 
 QString Feed::title()
@@ -54,6 +55,5 @@ void Feed::setDate(QString date)
 
 QString Feed::toString()
 {
-    return "<div style=\"background-color: red;\">" +
-            _title + "<p>" + _date + "</p>" + _content + "<p>" + _link + "</p></div>";
+    return _title + "<p>" + _date + "</p>" + _content + "<p>" + _link + "</p>";
 }

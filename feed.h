@@ -8,7 +8,7 @@ class Feed
 {
 public:
     Feed();
-    Feed(QString title, QString content, QString link);
+    Feed(QString title, QString content, QString link, QString date);
     QString title();
     QString content();
     QString link();
