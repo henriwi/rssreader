@@ -136,7 +136,7 @@ void MainWindow::on_deleteButton_clicked()
 
 void MainWindow::deleteUrl(QUrl stringUrl)
 {
-    query->prepare("DELETE FROM Url WHERE url=:stringUrl" );
+    query->prepare("DELETE FROM Feed WHERE url=:stringUrl" );
     query->bindValue(":stringUrl", stringUrl);
     query->exec();
 
@@ -150,7 +150,7 @@ void MainWindow::updateTreeview()
 {
     ui->treeWidget->clear();
 
-    query->exec("SELECT url FROM Url");
+    query->exec("SELECT DISTINCT url FROM Feed");
 
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
     widgetItemAll->setText(0, "All");
@@ -161,6 +161,7 @@ void MainWindow::updateTreeview()
         widgetItem->setText(0, query->value(0).toString());
     }
     ui->treeWidget->expandAll();
+
 }
 
 bool MainWindow::createConnection()
@@ -185,8 +186,8 @@ bool MainWindow::createConnection()
 void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
-    query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
-    //query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
+    //query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
+    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
@@ -207,10 +208,33 @@ void MainWindow::updateRss()
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     ui->urlEdit->setText(item->text(column));
+    ui->rssEdit->clear();
+    if (item->text(column) == "All")
+    {
+        query->exec("SELECT title, date, content, link FROM Feed ORDER BY date");           //Date er ikke formatert rett for dette
+        while (query->next())
+        {
+            ui->rssEdit->append(query->value(0).toString());
+            ui->rssEdit->append(query->value(1).toString());
+            ui->rssEdit->append(query->value(2).toString());
+            ui->rssEdit->append(query->value(3).toString());
+        }
 
-    query->exec("SELECT title FROM Feed, Url where Url.url = Feed.url");
+    }
+    else
+    {
+        query->prepare("SELECT title, date, content, link FROM Feed WHERE url = :url");
+        query->bindValue(":url", ui->urlEdit->text());
+        query->exec();
 
-
+        while (query->next())
+        {
+            ui->rssEdit->append(query->value(0).toString());
+            ui->rssEdit->append(query->value(1).toString());
+            ui->rssEdit->append(query->value(2).toString());
+            ui->rssEdit->append(query->value(3).toString());
+        }
+    }
     updateRss();
 }
 
@@ -222,10 +246,7 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         http.abort();
     else {
         xml.addData(http.readAll());
-        //feed = xmlParser->parseXml(&xml, query);
         xmlParser->parseXml(&xml, query, &url);
-
-        //ui->rssEdit->append(feed);
     }    
     updateTreeview();
 }

@@ -44,22 +44,22 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
             }
             endElement = "";
 
-           /* query->prepare("INSERT INTO Feed (url, title, content, date) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
+
+            //query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
+
+            query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
             query->bindValue(":stringUrl", url->toString());
             query->bindValue(":stringTitle", feed.title());
             query->bindValue(":stringContent", feed.content());
             query->bindValue(":stringDate", feed.date());
             query->bindValue(":stringLink", feed.link());
             query->bindValue(":boolUnread", true);
-            query->exec();*/
-
-            /*query->prepare("INSERT INTO Url (url VALUES (:stringUrl)");
-            query->bindValue(":stringUrl", url->toString());
-            query->exec();*/
-
-            query->prepare("INSERT INTO Url (url) VALUES (:stringUrl)");
-            query->bindValue(":stringUrl", url->toString());
             query->exec();
+
+            //Working
+            /*query->prepare("INSERT INTO Url (url) VALUES (:stringUrl)");
+            query->bindValue(":stringUrl", url->toString());
+            query->exec();*/
 
 
             //feeds.append(feed);
