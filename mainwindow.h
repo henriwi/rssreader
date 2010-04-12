@@ -52,7 +52,7 @@ private:
     QString feed;
     QSystemTrayIcon* trayIcon;
     QAction* quitAction;
-    //QMenu* trayIconMenu;
+    QMenu* trayIconMenu;
 
 private slots:
     void on_deleteButton_clicked();
@@ -61,7 +61,7 @@ private slots:
     void readData(const QHttpResponseHeader &resp);
     void rssLinkedClicked(QUrl url);
     void finished(int id, bool error);
-    //void iconActivated(QSystemTrayIcon::ActivationReason reason);
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void updateRss();
 };
 
