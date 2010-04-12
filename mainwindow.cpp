@@ -186,7 +186,7 @@ void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
     query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
-    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Url PRIMARY KEY (title))");
+    //query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
@@ -216,15 +216,18 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
 {
+    url.setUrl(ui->urlEdit->text());
+
     if (resp.statusCode() != 200)
         http.abort();
     else {
         xml.addData(http.readAll());
         //feed = xmlParser->parseXml(&xml, query);
-        xmlParser->parseXml(&xml, query);
+        xmlParser->parseXml(&xml, query, &url);
 
         //ui->rssEdit->append(feed);
-    }
+    }    
+    updateTreeview();
 }
 
 void MainWindow::rssLinkedClicked(QUrl url)
@@ -249,6 +252,7 @@ void MainWindow::on_searchButton_clicked()
 
     if(searchdialog.exec() == QDialog::Accepted) {
         QUrl url = searchdialog.feedUrl();
+        ui->urlEdit->setText(url.toString());
         addUrl(url);
     }
 }
@@ -268,10 +272,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    /*switch (reason) {
+    switch (reason) {
     case QSystemTrayIcon::Trigger:
         show();
         break;
-    }*/
+    }
 }
 

@@ -8,7 +8,7 @@ XMLParser::XMLParser(QObject *parent) :
 
 }
 
-void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query)
+void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
 {
     QString endElement = "";
     while (!xml->atEnd()) {
@@ -44,20 +44,26 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query)
             }
             endElement = "";
 
-            query->prepare("INSERT INTO Feed (url, title, content, date) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
-            //query->bindValue(":stringUrl", url);
+           /* query->prepare("INSERT INTO Feed (url, title, content, date) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
+            query->bindValue(":stringUrl", url->toString());
             query->bindValue(":stringTitle", feed.title());
             query->bindValue(":stringContent", feed.content());
             query->bindValue(":stringDate", feed.date());
             query->bindValue(":stringLink", feed.link());
             query->bindValue(":boolUnread", true);
+            query->exec();*/
+
+            /*query->prepare("INSERT INTO Url (url VALUES (:stringUrl)");
+            query->bindValue(":stringUrl", url->toString());
+            query->exec();*/
+
+            query->prepare("INSERT INTO Url (url) VALUES (:stringUrl)");
+            query->bindValue(":stringUrl", url->toString());
             query->exec();
 
-            query->prepare("INSERT INTO Url (url VALUES (:stringUrl)");
-            query->bindValue(":stringUrl", feed.link());
-            query->exec()            ;
 
             //feeds.append(feed);
+
             
         }
     }
