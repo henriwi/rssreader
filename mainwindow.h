@@ -55,6 +55,7 @@ private:
     QMenu* trayIconMenu;
 
 private slots:
+    void on_searchButton_clicked();
     void on_deleteButton_clicked();
     void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
     void on_addButton_clicked();

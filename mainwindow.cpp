@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowTitle(tr("RSS-Reader"));
+
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
@@ -20,11 +22,14 @@ MainWindow::MainWindow(QWidget *parent) :
     createConnection();
     xmlParser = new XMLParser;
     trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(QIcon(":/img/trayIcon.gif"));
+    trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
     quitAction = new QAction(tr("Quit"), this);
+
+    setWindowIcon(QIcon(":/img/windowIcon.png"));
+
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(quitAction);
@@ -33,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
     timer->start(300000);          //Updates every 5 minutes
+
+    //setWindowState(Qt::WindowMaximized);
 
 }
 
@@ -43,7 +50,6 @@ MainWindow::~MainWindow()
     delete timer;
     delete xmlParser;
     delete ui;
-
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -236,3 +242,36 @@ void MainWindow::finished(int id, bool error)
         ui->searchButton->setEnabled(true);
     }
 }
+
+void MainWindow::on_searchButton_clicked()
+{
+    SearchDialog searchdialog(this, ui->urlEdit->text());
+
+    if(searchdialog.exec() == QDialog::Accepted) {
+        QUrl url = searchdialog.feedUrl();
+        addUrl(url);
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (trayIcon->isVisible()) {
+        QMessageBox::information(this, tr("Systemtray information"),
+                                 tr("The program will keep running in the "
+                                    "system tray. To terminate the program, "
+                                    "right click on the system tray icon and "
+                                    "choose <b>Quit</b>."));
+        hide();
+        event->ignore();
+    }
+}
+
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    /*switch (reason) {
+    case QSystemTrayIcon::Trigger:
+        show();
+        break;
+    }*/
+}
+

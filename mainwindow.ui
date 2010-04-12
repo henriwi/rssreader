@@ -20,7 +20,7 @@
       <x>360</x>
       <y>10</y>
       <width>681</width>
-      <height>111</height>
+      <height>140</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
@@ -254,6 +254,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionDelete_marked_URL">
    <property name="text">
     <string>Delete marked URL</string>
+   </property>
+  </action>
+  <action name="actionUpdate_RSS">
+   <property name="text">
+    <string>Update RSS</string>
    </property>
   </action>
   <action name="actionUpdate_RSS_feed">
