@@ -22,6 +22,8 @@ public:
 
 protected:
     void changeEvent(QEvent *e);
+    void contextMenuEvent(QContextMenuEvent *event);
+
 
 private:
     Ui::MainWindow *ui;
@@ -29,8 +31,16 @@ private:
     void setupDatabase();
     void updateTreeview();
     void addUrl(QUrl url);
-    void deleteUrl(QUrl url);
     bool validUrl(QString url);
+    void createActions();
+    void deleteUrl(QUrl url);
+
+    QAction *deleteAct;
+    QAction *updateAct;
+
+    QMenu *menu;
+    QTimer *timer;
+
     QSqlQuery *query;
     QSqlDatabase db;
     XMLParser* xmlParser;
@@ -47,6 +57,7 @@ private slots:
     void readData(const QHttpResponseHeader &);
     void rssLinkedClicked(QUrl url);
     void finished(int id, bool error);
+    void updateRss();
 };
 
 #endif // MAINWINDOW_H

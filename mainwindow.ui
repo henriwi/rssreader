@@ -2,28 +2,46 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1056</width>
-    <height>662</height>
+    <width>1054</width>
+    <height>649</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="gridLayoutWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>10</y>
-      <width>681</width>
-      <height>111</height>
+      <x>380</x>
+      <y>0</y>
+      <width>551</width>
+      <height>121</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinAndMaxSize</enum>
+     </property>
      <item row="0" column="0" colspan="2">
       <widget class="QLabel" name="urlLabel">
        <property name="sizePolicy">
@@ -37,7 +55,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
+     <item row="0" column="3">
       <widget class="QPushButton" name="searchButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -50,7 +68,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="6">
+     <item row="0" column="4">
       <widget class="QPushButton" name="addButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -63,27 +81,14 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="2">
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>RSS-feed:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="7">
+     <item row="0" column="5">
       <widget class="QPushButton" name="deleteButton">
        <property name="text">
         <string>Delete</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="0" column="2">
       <widget class="QLineEdit" name="urlEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -99,7 +104,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="4">
+     <item row="1" column="0" colspan="3">
       <widget class="QLabel" name="urlErrorLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -112,15 +117,53 @@
        </property>
       </widget>
      </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>RSS-feed:</string>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </widget>
+   <widget class="QTextBrowser" name="rssEdit">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>120</y>
+      <width>621</width>
+      <height>411</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+    <property name="openExternalLinks">
+     <bool>false</bool>
+    </property>
+    <property name="openLinks">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QTreeWidget" name="treeWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>351</width>
-      <height>621</height>
+      <width>381</width>
+      <height>331</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -166,6 +209,15 @@
       </disabled>
      </palette>
     </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::WheelFocus</enum>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::DefaultContextMenu</enum>
+    </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
@@ -181,32 +233,13 @@
      </property>
     </column>
    </widget>
-   <widget class="QTextBrowser" name="rssEdit">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>150</y>
-      <width>661</width>
-      <height>461</height>
-     </rect>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-    <property name="openExternalLinks">
-     <bool>false</bool>
-    </property>
-    <property name="openLinks">
-     <bool>false</bool>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1056</width>
+     <width>1054</width>
      <height>21</height>
     </rect>
    </property>
@@ -222,6 +255,7 @@
     </widget>
     <addaction name="actionAdd_URL"/>
     <addaction name="menuDelete_URL"/>
+    <addaction name="actionUpdate_RSS_now"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -246,6 +280,16 @@
   <action name="actionDelete_marked_URL">
    <property name="text">
     <string>Delete marked URL</string>
+   </property>
+  </action>
+  <action name="actionUpdate_evry_minute">
+   <property name="text">
+    <string>Update evry minute</string>
+   </property>
+  </action>
+  <action name="actionUpdate_RSS_now">
+   <property name="text">
+    <string>Update RSS now</string>
    </property>
   </action>
  </widget>
