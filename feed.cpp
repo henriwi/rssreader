@@ -5,11 +5,12 @@ Feed::Feed()
 
 }
 
-Feed::Feed(QString title, QString content, QString link)
+Feed::Feed(QString title, QString content, QString link, QString date)
 {
     this->_title = title;
     this->_content = content;
     this->_link = link;
+    this->_date = date;
 }
 
 QString Feed::title()

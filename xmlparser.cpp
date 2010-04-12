@@ -3,51 +3,47 @@
 using namespace std;
 
 XMLParser::XMLParser(QObject *parent) :
-    QObject(parent)
+        QObject(parent)
 {
 
 }
 
 QString XMLParser::parseXml(QXmlStreamReader* xml)
 {
-    QString endElement = "";
+    QString title = "";
+    QString content = "";
+    QString date = "";
+    QString link = "";
+
     while (!xml->atEnd()) {
         xml->readNext();
         if (xml->isStartElement()) {
             currentTag = xml->name().toString();
         }
-        if (currentTag == "item") {
-            Feed feed;
-            int i = 0;
-            while (i++ < 20 /*endElement != "item"*/) {
-                xml->readNext();
-                if(xml->isStartElement()) {
-                    currentTag = xml->name().toString();
-                    xml->attributes();
-                }
-                else if(xml->isEndElement()) {
-                    endElement = xml->name().toString();
-                }
-                else if(xml->isCharacters() && !xml->isWhitespace()) {
-                    if (currentTag == "title") {
-                        feed.setTitle("<h3 style=\"color: #363636;\">" + xml->text().toString() + "</h3>");
-                    }
-                    else if(currentTag == "description") {
-                        feed.setContent(xml->text().toString());
-                    }
-                    else if (currentTag == "link") {
-                        feed.setLink("<a href='" + xml->text().toString()+ "'>" + xml->text().toString() + "</a>");
-                    }
-                    else if (currentTag == "pubDate") {
-                        feed.setDate("<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>");
-                    }
-                }
+        else if(xml->isCharacters() && !xml->isWhitespace()) {
+            if (currentTag == "title") {
+                title = "<h3 style=\"color: #363636;\">" + xml->text().toString() + "</h3>";
             }
-            endElement = "";
+            else if(currentTag == "description") {
+                content = xml->text().toString();
+            }
+            else if (currentTag == "link") {
+                link = "<a href='" + xml->text().toString()+ "'>" + xml->text().toString() + "</a>";
+            }
+            else if (currentTag == "pubDate" || currentTag == "date") {
+                date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
+            }
+        }
+        if(title != "" && content != "" && date != "" && link != ""){
+            Feed feed(title, content, link, date);
             feeds.append(feed);
+            title = "";
+            content = "";
+            date = "";
+            link = "";
         }
     }
-    
+
     QTextEdit output;
     while(!feeds.isEmpty()) {
         output.append(feeds.takeFirst().toString());

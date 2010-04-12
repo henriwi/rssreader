@@ -207,6 +207,11 @@ p, li { white-space: pre-wrap; }
      <bool>false</bool>
     </property>
    </widget>
+   <zorder>gridLayoutWidget</zorder>
+   <zorder>treeWidget</zorder>
+   <zorder>rssEdit</zorder>
+   <zorder>groupBox</zorder>
+   <zorder>groupBox</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
