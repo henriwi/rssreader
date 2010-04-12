@@ -23,13 +23,14 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
                 xml->readNext();
                 if(xml->isStartElement()) {
                     currentTag = xml->name().toString();
+                    xml->attributes();
                 }
                 else if(xml->isEndElement()) {
                     endElement = xml->name().toString();
                 }
                 else if(xml->isCharacters() && !xml->isWhitespace()) {
                     if (currentTag == "title") {
-                        feed.setTitle("<h3>" + xml->text().toString() + "</h3>");
+                        feed.setTitle("<h3 style=\"color: #363636;\">" + xml->text().toString() + "</h3>");
                     }
                     else if(currentTag == "description") {
                         feed.setContent(xml->text().toString());
@@ -38,7 +39,7 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
                         feed.setLink("<a href='" + xml->text().toString()+ "'>" + xml->text().toString() + "</a>");
                     }
                     else if (currentTag == "pubDate") {
-                        feed.setDate(xml->text().toString());
+                        feed.setDate("<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>");
                     }
                 }
             }

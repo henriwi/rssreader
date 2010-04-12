@@ -10,8 +10,11 @@ TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
     xmlparser.cpp \
-    feed.cpp
+    feed.cpp \
+    searchdialog.cpp
 HEADERS += mainwindow.h \
     xmlparser.h \
-    feed.h
+    feed.h \
+    searchdialog.h
 FORMS += mainwindow.ui
+RESOURCES += images.qrc

@@ -7,6 +7,7 @@
 #include <QTreeWidgetItem>
 #include <QHttp>
 #include "xmlparser.h"
+#include "searchdialog.h"
 
 namespace Ui
 {
@@ -22,6 +23,7 @@ public:
 
 protected:
     void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *event);
 
 private:
     Ui::MainWindow *ui;
@@ -38,14 +40,19 @@ private:
     int connectionId;
     QUrl url;
     QString feed;
+    QSystemTrayIcon* trayIcon;
+    QAction* quitAction;
+    QMenu* trayIconMenu;
 
 private slots:
+    void on_searchButton_clicked();
     void on_deleteButton_clicked();
     void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
     void on_addButton_clicked();
-    void readData(const QHttpResponseHeader &);
+    void readData(const QHttpResponseHeader &resp);
     void rssLinkedClicked(QUrl url);
     void finished(int id, bool error);
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
 };
 
 #endif // MAINWINDOW_H

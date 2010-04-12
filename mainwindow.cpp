@@ -17,6 +17,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
     createConnection();
     xmlParser = new XMLParser;
+
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setIcon(QIcon(":/img/trayIcon.gif"));
+    trayIcon->show();
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+    quitAction = new QAction(tr("Quit"), this);
+
+    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(quitAction);
+    trayIcon->setContextMenu(trayIconMenu);
 }
 
 MainWindow::~MainWindow()
@@ -74,10 +86,9 @@ void MainWindow::deleteUrl(QUrl stringUrl)
     query->bindValue(":stringUrl", stringUrl);
     query->exec();
 
-    ui->rssEdit->clear();
+    //ui->rssEdit->clear();
     updateTreeview();
     ui->urlEdit->clear();
-    ui->rssEdit->clear();
 }
 
 void MainWindow::updateTreeview()
@@ -132,6 +143,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
     ui->searchButton->setDisabled(true);
     http.setHost(url.host());
     connectionId = http.get(url.path());
+    trayIcon->showMessage("Jasså?", "Lyst til å se på en feed kanskje?");
 }
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
@@ -158,5 +170,37 @@ void MainWindow::finished(int id, bool error)
     }
     else if (id == connectionId) {
         ui->searchButton->setEnabled(true);
+    }
+}
+
+void MainWindow::on_searchButton_clicked()
+{
+    SearchDialog searchdialog(this, ui->urlEdit->text());
+
+    if(searchdialog.exec() == QDialog::Accepted) {
+        QUrl url = searchdialog.feedUrl();
+        addUrl(url);
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (trayIcon->isVisible()) {
+        QMessageBox::information(this, tr("Systray"),
+                                 tr("The program will keep running in the "
+                                    "system tray. To terminate the program, "
+                                    "choose <b>Quit</b> in the context menu "
+                                    "of the system tray entry."));
+        hide();
+        event->ignore();
+    }
+}
+
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+        show();
+        break;
     }
 }
