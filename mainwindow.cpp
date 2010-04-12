@@ -213,7 +213,7 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         ui->rssEdit->append(feed);
         QTextCursor c = ui->rssEdit->textCursor();
         c.movePosition(QTextCursor::Start);
-        ui->rssEdit->setTextCursor(c);;
+        ui->rssEdit->setTextCursor(c);
     }
 }
 
