@@ -1,3 +1,4 @@
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -15,7 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
+    connect (ui->actionUpdate_RSS_now, SIGNAL (activated()), this, SLOT (updateRss()));
     createConnection();
+    createActions();
     xmlParser = new XMLParser;
 
     trayIcon = new QSystemTrayIcon(this);
@@ -29,14 +32,20 @@ MainWindow::MainWindow(QWidget *parent) :
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(quitAction);
     trayIcon->setContextMenu(trayIconMenu);
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
+    timer->start(300000);          //Updates every 5 minutes
 }
 
 MainWindow::~MainWindow()
 {
     db.close();
     delete query;
+    delete timer;
     delete xmlParser;
     delete ui;
+
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -51,17 +60,52 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
+void MainWindow::contextMenuEvent(QContextMenuEvent *event)
+ {
+    QPoint globalPos = ui->treeWidget->mapToGlobal(event->pos());
+    menu = new QMenu(this);
+    menu->addAction(updateAct);
+    menu->addAction(deleteAct);
+    //menu->exec(event->globalPos());
+    menu->exec(globalPos);      //funker ikke
+ }
+
+void MainWindow::createActions()
+{
+    deleteAct = new QAction (tr("&Delete"), this);
+    deleteAct->setStatusTip(tr("Delete URL"));
+    connect (deleteAct, SIGNAL (triggered()), this, SLOT (on_deleteButton_clicked()));
+
+    updateAct = new QAction (tr("&Update"), this);
+    updateAct->setStatusTip(tr("Update URL"));
+    connect (updateAct, SIGNAL (Triggered()), this, SLOT (updateRss()));
+}
+
 void MainWindow::on_addButton_clicked()
 {
     url.setUrl(ui->urlEdit->text());
-    if (!url.isValid())              //NOT WORKING: accepts all
+    if (!validUrl(url.toString()))             //url.isValid() don't work
     {
-        ui->urlErrorLabel->setText("Invalid URL: " + url.toString());
+        QMessageBox::warning(this, qApp->tr("Wrong URL"),
+                             qApp->tr("The URL is wrong\n"
+                                     "URL has to start with http, https or ftp."),
+                                        QMessageBox::Cancel);
     }
     else
     {
         addUrl(url);
     }
+}
+
+bool MainWindow::validUrl(QString stringUrl)
+{
+    QRegExp validUrlRegex("^(http|https|ftp):\\/\\/[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(([0-9]{1,5})?\\/?.*)$");
+
+    if (validUrlRegex.exactMatch(stringUrl))
+    {
+        return true;
+    }
+    return false;
 }
 
 void MainWindow::addUrl(QUrl stringUrl)
@@ -97,9 +141,12 @@ void MainWindow::updateTreeview()
 
     query->exec("SELECT url FROM Url");
 
+    QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
+    widgetItemAll->setText(0, "All");
+
     while (query->next())
     {
-        QTreeWidgetItem * widgetItem = new QTreeWidgetItem(ui->treeWidget);
+        QTreeWidgetItem * widgetItem = new QTreeWidgetItem(widgetItemAll);
         widgetItem->setText(0, query->value(0).toString());
     }
     ui->treeWidget->expandAll();
@@ -132,18 +179,26 @@ void MainWindow::setupDatabase()
     updateTreeview();
 }
 
+void MainWindow::updateRss()
+{
+    if (!ui->urlEdit->text().isEmpty())
+    {
+        ui->rssEdit->clear();
+        xml.clear();
+        url.setUrl(ui->urlEdit->text());
+        ui->searchButton->setDisabled(true);
+        http.setHost(url.host());
+        connectionId = http.get(url.path());
+    }
+
+}
+
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     ui->urlEdit->setText(item->text(column));
 
     //show rss-feed
-    ui->rssEdit->clear();
-    xml.clear();
-    url.setUrl(ui->urlEdit->text());
-    ui->searchButton->setDisabled(true);
-    http.setHost(url.host());
-    connectionId = http.get(url.path());
-    trayIcon->showMessage("Jasså?", "Lyst til å se på en feed kanskje?");
+    updateRss();
 }
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
