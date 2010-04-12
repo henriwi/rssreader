@@ -195,7 +195,6 @@ void MainWindow::updateRss()
         http.setHost(url.host());
         connectionId = http.get(url.path());
     }
-
 }
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
@@ -212,6 +211,9 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         xml.addData(http.readAll());
         feed = xmlParser->parseXml(&xml);
         ui->rssEdit->append(feed);
+        QTextCursor c = ui->rssEdit->textCursor();
+        c.movePosition(QTextCursor::Start);
+        ui->rssEdit->setTextCursor(c);;
     }
 }
 

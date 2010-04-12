@@ -14,7 +14,6 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
     QString content = "";
     QString date = "";
     QString link = "";
-    QString endTag = "";
 
     while (!xml->atEnd()) {
         xml->readNext();
@@ -25,10 +24,6 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
             if(xml->name() == "item") {
                 Feed feed(title, content, link, date);
                 feeds.append(feed);
-                title.clear();
-                content.clear();
-                date.clear();
-                link.clear();
             }
         }
         else if(xml->isCharacters() && !xml->isWhitespace()) {
@@ -53,4 +48,3 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
     }
     return output.toHtml();
 }
-
