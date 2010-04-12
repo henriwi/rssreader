@@ -55,6 +55,5 @@ void Feed::setDate(QString date)
 
 QString Feed::toString()
 {
-    return "<div style=\"background-color: red;\">" +
-            _title + "<p>" + _date + "</p>" + _content + "<p>" + _link + "</p></div>";
+    return _title + "<p>" + _date + "</p>" + _content + "<p>" + _link + "</p>";
 }

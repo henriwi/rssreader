@@ -34,7 +34,7 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
                 content = xml->text().toString();
             }
             else if (currentTag == "link") {
-                link = "<a href='" + xml->text().toString()+ "'>" + xml->text().toString() + "</a>";
+                link = "<a href='" + xml->text().toString()+ "'>" + tr("Read more here") + "</a>";
             }
             else if (currentTag == "pubDate" || currentTag == "date") {
                 date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
