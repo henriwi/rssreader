@@ -97,9 +97,10 @@ void SearchDialog::anchorClicked(QUrl url)
 
 void SearchDialog::loadProgress(int progress)
 {
-    if(progressDialog->wasCanceled()) {
-        hide();
-    }
+    /*if(progressDialog->wasCanceled()) {
+        progressDialog->hide();
+        view->stop();
+    }*/
     progressDialog->setValue(progress);
 }
 
