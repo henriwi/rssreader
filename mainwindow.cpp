@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
-    connect (ui->actionUpdate_RSS_now, SIGNAL (activated()), this, SLOT (updateRss()));
+    connect (ui->actionUpdate_RSS_feed, SIGNAL (activated()), this, SLOT (updateRss()));
     createActions();
     xmlParser = new XMLParser;
 

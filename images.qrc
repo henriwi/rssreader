@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/trayIcon.gif</file>
+    </qresource>
+</RCC>

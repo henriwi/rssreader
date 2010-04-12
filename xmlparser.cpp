@@ -44,12 +44,13 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query)
             }
             endElement = "";
 
-            query->prepare("INSERT INTO Feed (url, title, content, date) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink)");
+            query->prepare("INSERT INTO Feed (url, title, content, date) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
             //query->bindValue(":stringUrl", url);
             query->bindValue(":stringTitle", feed.title());
             query->bindValue(":stringContent", feed.content());
             query->bindValue(":stringDate", feed.date());
             query->bindValue(":stringLink", feed.link());
+            query->bindValue(":boolUnread", true);
             query->exec();
 
             query->prepare("INSERT INTO Url (url VALUES (:stringUrl)");
