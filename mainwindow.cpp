@@ -13,11 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    createConnection();
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
     connect (ui->actionUpdate_RSS_now, SIGNAL (activated()), this, SLOT (updateRss()));
-    createConnection();
     createActions();
     xmlParser = new XMLParser;
 
@@ -50,35 +50,17 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
  {
-    QPoint globalPos = ui->treeWidget->mapToGlobal(event->pos());
-    menu = new QMenu(this);
-    menu->addAction(updateAct);
-    menu->addAction(deleteAct);
-    //menu->exec(event->globalPos());
-    menu->exec(globalPos);      //funker ikke
+    QPoint globalPos = ui->treeWidget->mapToGlobal(event->globalPos());
+    if (ui->treeWidget->itemAt(event->pos()))
+    {
+        menu = new QMenu(this);
+        menu->addAction(updateAct);
+        menu->addAction(deleteAct);
+        //menu->exec(event->globalPos());
+        menu->exec(globalPos);
+    }
+
  }
-
-/*void MainWindow::ShowContextMenu(const QPoint& pos) // this is a slot
-{
-    // for most widgets
-    QPoint globalPos = myWidget->mapToGlobal(pos);
-    // for QAbstractScrollArea and derived classes you would use:
-    // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
-
-    QMenu myMenu;
-    myMenu.addAction("Menu Item 1");
-    // ...
-
-    QAction* selectedItem = myMenu.exec(globalPos);
-    if (selectedItem)
-    {
-        // something was chosen, do stuff
-    }
-    else
-    {
-        // nothing was chosen
-    }
-}*/
 
 void MainWindow::createActions()
 {
@@ -88,7 +70,7 @@ void MainWindow::createActions()
 
     updateAct = new QAction (tr("&Update"), this);
     updateAct->setStatusTip(tr("Update URL"));
-    connect (updateAct, SIGNAL (Triggered()), this, SLOT (updateRss()));
+    connect (updateAct, SIGNAL (triggered()), this, SLOT (updateRss()));
 }
 
 void MainWindow::on_addButton_clicked()
@@ -120,12 +102,14 @@ bool MainWindow::validUrl(QString stringUrl)
 
 void MainWindow::addUrl(QUrl stringUrl)
 {
-    query->prepare("INSERT INTO Url (url) VALUES (:stringUrl)");
-    query->bindValue(":stringUrl", stringUrl);
-    query->exec();
+    ui->rssEdit->clear();
+    xml.clear();
+    url.setUrl(stringUrl.toString());
+    ui->searchButton->setDisabled(true);
+    http.setHost(url.host());
+    connectionId = http.get(url.path());
 
     updateTreeview();
-    ui->urlEdit->clear();
 }
 
 void MainWindow::on_deleteButton_clicked()
@@ -186,13 +170,13 @@ void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
     query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
-
+    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Url PRIMARY KEY (title))");
     updateTreeview();
 }
 
 void MainWindow::updateRss()
 {
-    if (!ui->urlEdit->text().isEmpty())
+    /*if (!ui->urlEdit->text().isEmpty())
     {
         ui->rssEdit->clear();
         xml.clear();
@@ -200,7 +184,7 @@ void MainWindow::updateRss()
         ui->searchButton->setDisabled(true);
         http.setHost(url.host());
         connectionId = http.get(url.path());
-    }
+    }*/
 
 }
 
@@ -208,24 +192,11 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     ui->urlEdit->setText(item->text(column));
 
-    //show rss-feed
-    /*ui->rssEdit->clear();
-    xml.clear();
-    url.setUrl(ui->urlEdit->text());
-    ui->searchButton->setDisabled(true);
-    http.setHost(url.host());
-    connectionId = http.get(url.path());*/
+    query->exec("SELECT title FROM Feed, Url where Url.url = Feed.url");
+
+
     updateRss();
 }
-
-/*void MainWindow::time()
-{
-    timer.start();
-    if (timer.elapsed() == 60000)
-    {
-        updateRss();
-    }
-}*/
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
 {
@@ -233,8 +204,10 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         http.abort();
     else {
         xml.addData(http.readAll());
-        feed = xmlParser->parseXml(&xml);
-        ui->rssEdit->append(feed);
+        //feed = xmlParser->parseXml(&xml, query);
+        xmlParser->parseXml(&xml, query);
+
+        //ui->rssEdit->append(feed);
     }
 }
 

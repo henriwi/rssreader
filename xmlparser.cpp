@@ -8,7 +8,7 @@ XMLParser::XMLParser(QObject *parent) :
 
 }
 
-QString XMLParser::parseXml(QXmlStreamReader* xml)
+void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query)
 {
     QString endElement = "";
     while (!xml->atEnd()) {
@@ -43,14 +43,29 @@ QString XMLParser::parseXml(QXmlStreamReader* xml)
                 }
             }
             endElement = "";
-            feeds.append(feed);
+
+            query->prepare("INSERT INTO Feed (url, title, content, date) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink)");
+            //query->bindValue(":stringUrl", url);
+            query->bindValue(":stringTitle", feed.title());
+            query->bindValue(":stringContent", feed.content());
+            query->bindValue(":stringDate", feed.date());
+            query->bindValue(":stringLink", feed.link());
+            query->exec();
+
+            query->prepare("INSERT INTO Url (url VALUES (:stringUrl)");
+            query->bindValue(":stringUrl", feed.link());
+            query->exec()            ;
+
+            //feeds.append(feed);
+            
         }
     }
+
     
-    QTextEdit output;
+    /*QTextEdit output;
     while(!feeds.isEmpty()) {
         output.append(feeds.takeFirst().toString());
     }
-    return output.toHtml();
+    return output.toHtml();*/
 }
 
