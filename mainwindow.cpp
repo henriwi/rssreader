@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(tr("RSS-Reader"));
+    ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
@@ -39,9 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
     timer->start(300000);          //Updates every 5 minutes
 
-    progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
-    progressDialog->setWindowModality(Qt::WindowModal);
-    connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
+    //progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
+    //progressDialog->setWindowModality(Qt::WindowModal);
+    //connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
 
     //setWindowState(Qt::WindowMaximized);
 
