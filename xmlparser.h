@@ -13,7 +13,7 @@ class XMLParser : public QObject
 Q_OBJECT
 public:
     explicit XMLParser(QObject *parent = 0);
-    void parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url, QHttp* http);
+    void parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url);
 
 signals:
 

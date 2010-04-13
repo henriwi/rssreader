@@ -8,7 +8,7 @@ XMLParser::XMLParser(QObject *parent) :
 
 }
 
-void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url, QHttp* http)
+void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
 {
     QString title = "";
     QString content = "";

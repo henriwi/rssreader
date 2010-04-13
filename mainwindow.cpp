@@ -39,10 +39,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
     timer->start(300000);          //Updates every 5 minutes
 
-    progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
-    progressDialog->setWindowModality(Qt::WindowModal);
-    connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
-
     //setWindowState(Qt::WindowMaximized);
 
 }
@@ -129,8 +125,6 @@ void MainWindow::addUrl(QUrl stringUrl)
     http.setHost(url.host());
     connectionId = http.get(url.path());
 
-    progressDialog->show();
-    progressDialog->setValue(0);
     updateTreeview();
 }
 
@@ -157,19 +151,15 @@ void MainWindow::updateTreeview()           //legge til ny query for å hente ant
     ui->treeWidget->clear();
 
     query->exec("SELECT DISTINCT url, COUNT(unread) FROM Feed group by url");
-    QSqlQuery *localQuery = new QSqlQuery;
 
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
     widgetItemAll->setText(0, "All");
 
     while (query->next())
     {
-        /*localQuery->prepare("SELECT COUNT(unread) FROM Feed WHERE unread=1 AND url=:stringUrl");
-        localQuery->bindValue(":stringUrl", query->isValid().toString());
-        localQuery->exec();*/
-
         QTreeWidgetItem * widgetItem = new QTreeWidgetItem(widgetItemAll);
-        widgetItem->setText(0, query->value(0).toString() + query->value(1).toString());
+        widgetItem->setText(0, query->value(0).toString());
+        widgetItem->setText(1, query->value(1).toString());
     }
     ui->treeWidget->expandAll();
     ui->treeWidget->sortItems(0,Qt::AscendingOrder);
@@ -249,7 +239,6 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
             ui->rssEdit->append(query->value(3).toString());
         }
     }
-
     /*QTextCursor c = ui->rssEdit->textCursor();
     c.movePosition(QTextCursor::Start);
     ui->rssEdit->setTextCursor(c);*/
@@ -260,12 +249,11 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
 {
     //url.setUrl(ui->urlEdit->text());
 
-    if (resp.statusCode() != 200) {
+    if (resp.statusCode() != 200)
         http.abort();
-    }
     else {
         xml.addData(http.readAll());
-        xmlParser->parseXml(&xml, query, &url, &http);
+        xmlParser->parseXml(&xml, query, &url);
     }    
     updateTreeview();
 }
@@ -278,7 +266,8 @@ void MainWindow::rssLinkedClicked(QUrl url)
 void MainWindow::finished(int id, bool error)
 {
     if (error) {
-        showErrorMessageAndCloseProgressDialog();
+        qWarning("Received error during HTTP fetch.");
+
     }
     else if (id == connectionId) {
         ui->searchButton->setEnabled(true);
@@ -318,16 +307,3 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWindow::downloadFeedProgress(int done, int total)
-{
-    progressDialog->setMaximum(total);
-    progressDialog->setValue(done);
-}
-
-void MainWindow::showErrorMessageAndCloseProgressDialog()
-{
-    progressDialog->close();
-    QMessageBox::warning(this, tr("Downloaderror"), tr("Was not able to download the feed. "
-                                                       "Please make sure you have entered a valid feed-adress."),
-                         QMessageBox::Ok);
-}
