@@ -50,10 +50,10 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
     foreach (Feed feed, feeds) {
         query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :intUnread)");
         query->bindValue(":stringUrl", url->toString());
-        query->bindValue(":stringTitle", feedTitle /*feed.title()*/);
-        query->bindValue(":stringContent", feed.content());
-        query->bindValue(":stringDate", feed.date());
-        query->bindValue(":stringLink", feed.link());
+        query->bindValue(":stringTitle", feed.title().trimmed());
+        query->bindValue(":stringContent", feed.content().trimmed());
+        query->bindValue(":stringDate", feed.date().trimmed());
+        query->bindValue(":stringLink", feed.link().trimmed());
         query->bindValue(":intUnread", 1);
         query->exec();
     }
