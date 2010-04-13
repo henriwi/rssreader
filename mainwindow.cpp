@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
     connect (ui->actionUpdate_RSS_feed, SIGNAL (activated()), this, SLOT (updateRss()));
     createConnection();
+    createActions();
     xmlParser = new XMLParser;
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
@@ -215,45 +216,43 @@ void MainWindow::updateRss()
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
+    QTextEdit output;
     ui->urlEdit->setText(item->text(column));
     ui->rssEdit->clear();
-    if (item->text(column) == "All")
-    {
+    if (item->text(column) == "All") {
         query->exec("SELECT title, date, content, link FROM Feed ORDER BY date");           //Date er ikke formatert rett for dette
-        while (query->next())
-        {
-
-            ui->rssEdit->append(query->value(0).toString());
-            //ui->rssEdit->append(query->value(1).toString());
-            ui->rssEdit->append(query->value(2).toString());
-            ui->rssEdit->append(query->value(3).toString());
+        while (query->next())  {
+            output.append(query->value(0).toString());
+            output.append(query->value(1).toString());
+            output.append(query->value(2).toString());
+            output.append(query->value(3).toString());
         }
-
     }
-    else
-    {
-        query->prepare("SELECT title, date, content, link FROM Feed WHERE url = :url");
+    else {
+        query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url");
         query->bindValue(":url", ui->urlEdit->text());
         query->exec();
 
-        while (query->next())
-        {
-            ui->rssEdit->append(query->value(0).toString());
-            ui->rssEdit->append(query->value(1).toString());
-            ui->rssEdit->append(query->value(2).toString());
-            ui->rssEdit->append(query->value(3).toString());
+        while (query->next()) {
+            output.append(query->value(0).toString());
+            output.append(query->value(1).toString());
+            output.append(query->value(2).toString());
+
+            // If the feed has been read, change the font-color
+            if(!query->value(5).toInt()) {
+                output.append("<a style=\"color: #363636;\" href='" + query->value(4).toString() + "'>" + tr("Read more here") + "</a>");
+            }
+            else {
+                output.append(query->value(3).toString());
+            }
         }
     }
-    /*QTextCursor c = ui->rssEdit->textCursor();
-    c.movePosition(QTextCursor::Start);
-    ui->rssEdit->setTextCursor(c);*/
-    //updateRss();
+
+    ui->rssEdit->setHtml(output.toHtml());
 }
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
 {
-    //url.setUrl(ui->urlEdit->text());
-
     if (resp.statusCode() != 200)
         http.abort();
     else {
@@ -270,13 +269,6 @@ void MainWindow::rssLinkedClicked(QUrl url)
     query->bindValue(":linkUrl", url.toString());
     query->exec();
     updateTreeview();
-
-    /*ui->rssEdit->setText(url.toString());
-    query->exec("SELECT link FROM Feed");
-    while (query->next())
-    {
-        ui->rssEdit->setPlainText(query->value(0).toString());
-    }*/
 }
 
 void MainWindow::finished(int id, bool error)
