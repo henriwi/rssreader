@@ -32,7 +32,7 @@
     <property name="title">
      <string> Feed</string>
     </property>
-    <widget class="QTextBrowser" name="rssEdit">
+    <widget class="QTextBrowser" name="feedView">
      <property name="geometry">
       <rect>
        <x>15</x>
@@ -45,7 +45,7 @@
       <string>Displays the feed</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="urlLabel">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -61,7 +61,7 @@
 }</string>
      </property>
      <property name="text">
-      <string>http://vg.no/rss/create.php</string>
+      <string/>
      </property>
     </widget>
    </widget>
@@ -254,19 +254,6 @@ p, li { white-space: pre-wrap; }
      </column>
     </widget>
    </widget>
-   <widget class="QPushButton" name="deleteButton">
-    <property name="geometry">
-     <rect>
-      <x>1050</x>
-      <y>30</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -309,29 +296,9 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
   </widget>
-  <action name="actionAdd_URL">
-   <property name="text">
-    <string>Add URL</string>
-   </property>
-  </action>
   <action name="actionAbout_Rss_reader">
    <property name="text">
     <string>About Rss-reader</string>
-   </property>
-  </action>
-  <action name="actionDelete_marked_URL">
-   <property name="text">
-    <string>Delete marked URL</string>
-   </property>
-  </action>
-  <action name="actionUpdate_RSS">
-   <property name="text">
-    <string>Update RSS</string>
-   </property>
-  </action>
-  <action name="actionUpdate_RSS_feed">
-   <property name="text">
-    <string>Update RSS feed</string>
    </property>
   </action>
   <action name="actionClose">

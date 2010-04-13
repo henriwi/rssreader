@@ -22,6 +22,8 @@ public slots:
 private:
     QString currentTag;
     QLinkedList<Feed> feeds;
+    QString extractAndParseDate(QString pubDate);
+    QMap<QString, QString> months;
 
 };
 

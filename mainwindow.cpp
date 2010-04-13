@@ -19,8 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
-    connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
-    connect (ui->actionUpdate_RSS_feed, SIGNAL (activated()), this, SLOT (updateRss()));
+    connect(ui->feedView, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
+    connect(ui->actionUpdate, SIGNAL(triggered()), this, SLOT(updateRss()));
+    connect(ui->actionAdd_feed, SIGNAL(triggered()), this, SLOT(on_addButton_clicked()));
+    connect(ui->actionSearch, SIGNAL(triggered()), this, SLOT(on_searchButton_clicked()));
 
     createConnection();
     createActions();
@@ -47,9 +49,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    //progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
-    //progressDialog->setWindowModality(Qt::WindowModal);
+    progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
+    progressDialog->setWindowModality(Qt::WindowModal);
     //connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
+    progressDialog->setMaximum(0);
 
     //setWindowState(Qt::WindowMaximized);
 
@@ -92,26 +95,24 @@ void MainWindow::createActions()
 {
     deleteAct = new QAction (tr("&Delete"), this);
     deleteAct->setStatusTip(tr("Delete URL"));
-    connect (deleteAct, SIGNAL (triggered()), this, SLOT (on_deleteButton_clicked()));
+    connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteFeed()));
 
     updateAct = new QAction (tr("&Update"), this);
     ui->treeWidget->addAction(updateAct);
     updateAct->setStatusTip(tr("Update URL"));
-    connect (updateAct, SIGNAL (triggered()), this, SLOT (updateRss()));
+    connect(updateAct, SIGNAL(triggered()), this, SLOT(updateRss()));
 }
 
 void MainWindow::on_addButton_clicked()
 {
     url.setUrl(ui->urlEdit->text());
-    if (!validUrl(url.toString()))             //url.isValid() don't work
-    {
+    if (!validUrl(url.toString())) {
         QMessageBox::warning(this, qApp->tr("Wrong URL"),
                              qApp->tr("The URL is wrong\n"
-                                     "URL has to start with http, https or ftp."),
-                                        QMessageBox::Cancel);
+                                      "URL has to start with http, https or ftp."),
+                             QMessageBox::Cancel);
     }
-    else
-    {
+    else {
         addUrl(url);
     }
 }
@@ -120,16 +121,19 @@ bool MainWindow::validUrl(QString stringUrl)
 {
     QRegExp validUrlRegex("^(http|https|ftp):\\/\\/[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(([0-9]{1,5})?\\/?.*)$");
 
-    if (validUrlRegex.exactMatch(stringUrl))
-    {
+    if (validUrlRegex.exactMatch(stringUrl)){
         return true;
     }
-    return false;
+    else {
+        return false;
+    }
 }
 
 void MainWindow::addUrl(QUrl stringUrl)
 {
-    ui->rssEdit->clear();
+    progressDialog->setValue(0);
+    progressDialog->show();
+    ui->feedView->clear();
     xml.clear();
     url.setUrl(stringUrl.toString());
     ui->searchButton->setDisabled(true);
@@ -137,24 +141,20 @@ void MainWindow::addUrl(QUrl stringUrl)
     connectionId = http.get(url.path());
 
     updateTreeview();
+    ui->urlEdit->clear();
 }
 
-void MainWindow::on_deleteButton_clicked()
+void MainWindow::deleteFeed()
 {
-    QUrl url(ui->urlEdit->text());
-    deleteUrl(url);
-}
+    QUrl url(ui->treeWidget->currentItem()->text(0));
 
-void MainWindow::deleteUrl(QUrl stringUrl)
-{
     query->prepare("DELETE FROM Feed WHERE url=:stringUrl" );
-    query->bindValue(":stringUrl", stringUrl);
+    query->bindValue(":stringUrl", url);
     query->exec();
 
-    ui->rssEdit->clear();
+    ui->feedView->clear();
+    ui->urlLabel->clear();
     updateTreeview();
-    ui->urlEdit->clear();
-    ui->rssEdit->clear();
 }
 
 void MainWindow::updateTreeview()
@@ -166,23 +166,21 @@ void MainWindow::updateTreeview()
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
     widgetItemAll->setText(0, "All");
 
-    while (query->next())
-    {
+    while (query->next()) {
         QTreeWidgetItem * widgetItem = new QTreeWidgetItem(widgetItemAll);
         widgetItem->setText(0, query->value(0).toString());
         widgetItem->setText(1, query->value(1).toString());
     }
+
     ui->treeWidget->expandAll();
     ui->treeWidget->sortItems(0,Qt::AscendingOrder);
-
 }
 
 bool MainWindow::createConnection()
  {
     db = QSqlDatabase::addDatabase("QSQLITE");
      db.setDatabaseName("rssreader");
-     if (!db.open())
-     {
+     if (!db.open()) {
          QMessageBox::critical(0, qApp->tr("Cannot open database"),
              qApp->tr("Unable to establish a database connection.\n"
                       "This example needs SQLite support. Please read "
@@ -199,7 +197,7 @@ bool MainWindow::createConnection()
 void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
-    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, linkUrl varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
+    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date datetime, link varchar, linkUrl varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
@@ -207,25 +205,26 @@ void MainWindow::updateRss()
 {
     query->exec("SELECT DISTINCT url FROM Feed");
 
-    while (query->next())
-    {
+    while (query->next()) {
         xml.clear();
         url.setUrl(query->value(0).toString());
         http.setHost(url.host());
         connectionId = http.get(url.path());
     }
 
-    ui->rssEdit->clear();
+    ui->feedView->clear();
     updateTreeview();
 }
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     QTextEdit output;
-    ui->urlEdit->setText(item->text(column));
-    ui->rssEdit->clear();
+    QUrl url(item->text(0));
+    ui->urlLabel->setText(url.toString());
+    ui->feedView->clear();
+
     if (item->text(column) == "All") {
-        query->exec("SELECT title, date, content, link FROM Feed ORDER BY date");           //Date er ikke formatert rett for dette
+        query->exec("SELECT title, date, content, link FROM Feed ORDER BY date DESC");
         while (query->next())  {
             output.append(query->value(0).toString());
             output.append(query->value(1).toString());
@@ -234,8 +233,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
         }
     }
     else {
-        query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url");
-        query->bindValue(":url", ui->urlEdit->text());
+        query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url ORDER BY date DESC");
+        query->bindValue(":url", url.toString());
         query->exec();
 
         while (query->next()) {
@@ -253,7 +252,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
         }
     }
 
-    ui->rssEdit->setHtml(output.toHtml());
+    ui->feedView->setHtml(output.toHtml());
 }
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
@@ -283,6 +282,7 @@ void MainWindow::finished(int id, bool error)
 
     }
     else if (id == connectionId) {
+        progressDialog->close();
         ui->searchButton->setEnabled(true);
     }
 }

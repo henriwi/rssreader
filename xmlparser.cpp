@@ -5,7 +5,18 @@ using namespace std;
 XMLParser::XMLParser(QObject *parent) :
         QObject(parent)
 {
-
+    months.insert("Jan", "01");
+    months.insert("Feb", "02");
+    months.insert("Mar", "03");
+    months.insert("Apr", "04");
+    months.insert("May", "05");
+    months.insert("Jun", "06");
+    months.insert("Jul", "07");
+    months.insert("Aug", "08");
+    months.insert("Sep", "09");
+    months.insert("Okt", "10");
+    months.insert("Nov", "11");
+    months.insert("Des", "12");
 }
 
 void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
@@ -40,13 +51,14 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
                 linkUrl = xml->text().toString();
             }
             else if (currentTag == "pubDate" || currentTag == "date") {
-                date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
+                date = extractAndParseDate(xml->text().toString());
+                //date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
             }
         }
     }
 
     foreach(Feed feed, feeds) {
-        query->prepare("INSERT INTO Feed (url, title, content, date, link, linkUrl, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :stringLinkUrl, :intUnread)");
+        query->prepare("INSERT INTO Feed (url, title, content, date, link, linkUrl, unread) VALUES (:stringUrl, :stringTitle, :stringContent, DATETIME(:stringDate), :stringLink, :stringLinkUrl, :intUnread)");
         query->bindValue(":stringUrl", url->toString());
         query->bindValue(":stringTitle", feed.title().trimmed());
         query->bindValue(":stringContent", feed.content().trimmed());
@@ -56,5 +68,13 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
         query->bindValue(":intUnread", 1);
         query->exec();
     }
+}
 
+QString XMLParser::extractAndParseDate(QString pubDate)
+{
+    QStringList pubDateList = pubDate.split(QRegExp("\\W+"));
+    QString formatedDate = pubDateList.value(3) + "-" + months.value(pubDateList.value(2)) + "-" +
+                           pubDateList.value(1) + " " + pubDateList.value(4) + ":" +
+                           pubDateList.value(5) + ":" + pubDateList.value(6);
+    return formatedDate;
 }
