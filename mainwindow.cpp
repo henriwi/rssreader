@@ -146,7 +146,7 @@ void MainWindow::deleteUrl(QUrl stringUrl)
     ui->rssEdit->clear();
 }
 
-void MainWindow::updateTreeview()
+void MainWindow::updateTreeview()           //legge til ny query for å hente antall unread = 1??
 {
     ui->treeWidget->clear();
 
@@ -161,6 +161,7 @@ void MainWindow::updateTreeview()
         widgetItem->setText(0, query->value(0).toString());
     }
     ui->treeWidget->expandAll();
+    ui->treeWidget->sortItems(0,Qt::AscendingOrder);
 
 }
 
@@ -193,15 +194,18 @@ void MainWindow::setupDatabase()
 
 void MainWindow::updateRss()
 {
-    /*if (!ui->urlEdit->text().isEmpty())
+    query->exec("SELECT DISTINCT url FROM Feed");
+
+    while (query->next())
     {
-        ui->rssEdit->clear();
         xml.clear();
-        url.setUrl(ui->urlEdit->text());
-        ui->searchButton->setDisabled(true);
+        url.setUrl(query->value(0).toString());
         http.setHost(url.host());
         connectionId = http.get(url.path());
-    }*/
+    }
+
+    ui->rssEdit->clear();
+    updateTreeview();
 }
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
@@ -213,8 +217,9 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
         query->exec("SELECT title, date, content, link FROM Feed ORDER BY date");           //Date er ikke formatert rett for dette
         while (query->next())
         {
+
             ui->rssEdit->append(query->value(0).toString());
-            ui->rssEdit->append(query->value(1).toString());
+            //ui->rssEdit->append(query->value(1).toString());
             ui->rssEdit->append(query->value(2).toString());
             ui->rssEdit->append(query->value(3).toString());
         }
@@ -237,12 +242,12 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
     /*QTextCursor c = ui->rssEdit->textCursor();
     c.movePosition(QTextCursor::Start);
     ui->rssEdit->setTextCursor(c);*/
-    updateRss();
+    //updateRss();
 }
 
 void MainWindow::readData(const QHttpResponseHeader &resp)
 {
-    url.setUrl(ui->urlEdit->text());
+    //url.setUrl(ui->urlEdit->text());
 
     if (resp.statusCode() != 200)
         http.abort();
