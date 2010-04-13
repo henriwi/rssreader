@@ -21,11 +21,11 @@ XMLParser::XMLParser(QObject *parent) :
 
 bool XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
 {
-    QString title = "";
-    QString content = "";
-    QString date = "";
-    QString link = "";
-    QString linkUrl = "";
+    QString title;
+    QString content;
+    QString date;
+    QString link;
+    QString linkUrl;
 
     while (!xml->atEnd()) {
         xml->readNext();
@@ -38,13 +38,12 @@ bool XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
                 feeds.append(feed);
             }
         }
-        else if(xml->isCharacters() && !xml->isWhitespace()) {
+        else if (xml->isCharacters() && !xml->isWhitespace()) {
             if (currentTag == "title") {
                 title = "<h3 style=\"color: #363636;\">" + xml->text().toString() + "</h3>";
             }
-            else if(currentTag == "description") {
+            else if (currentTag == "description") {
                 content = xml->text().toString();
-                //content = xml->readElementText(QXmlStreamReader::IncludeChildElements);
             }
             else if (currentTag == "link") {
                 link = "<a href='" + xml->text().toString()+ "'>" + tr("Read more here") + "</a>";
@@ -52,12 +51,11 @@ bool XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
             }
             else if (currentTag == "pubDate" || currentTag == "date") {
                 date = extractAndParseDate(xml->text().toString());
-                //date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
             }
         }
     }
 
-    if(feeds.isEmpty()) {
+    if (feeds.isEmpty()) {
         return false;
     }
 

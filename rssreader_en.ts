@@ -258,44 +258,46 @@ The URL has to start with http, https or ftp.</translation>
         <translation>All</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="288"/>
+        <location filename="mainwindow.cpp" line="292"/>
         <source>All feeds ordered by date (max 20)</source>
         <translation>All feeds ordered by date (max 20)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="324"/>
+        <location filename="mainwindow.cpp" line="328"/>
         <source>Read more here</source>
         <translation>Read more here</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="348"/>
-        <location filename="mainwindow.cpp" line="384"/>
+        <location filename="mainwindow.cpp" line="245"/>
+        <location filename="mainwindow.cpp" line="352"/>
+        <location filename="mainwindow.cpp" line="388"/>
         <source>Error</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="348"/>
-        <location filename="mainwindow.cpp" line="384"/>
+        <location filename="mainwindow.cpp" line="245"/>
+        <location filename="mainwindow.cpp" line="352"/>
+        <location filename="mainwindow.cpp" line="388"/>
         <source>Was not able to download the feed. Please make sure you have entered a valid feed-adress.</source>
         <translation>Was not able to download the feed. Please make sure you have entered a valid feed-adress.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="395"/>
+        <location filename="mainwindow.cpp" line="399"/>
         <source>Feeds updated</source>
         <translation>Feeds updated</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="396"/>
+        <location filename="mainwindow.cpp" line="400"/>
         <source>Feeds were updated, you have %1 unread feeds</source>
         <translation>Feeds were updated, you have %1 unread feeds</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="417"/>
+        <location filename="mainwindow.cpp" line="421"/>
         <source>About RSS-Reader</source>
         <translation>About RSS-Reader</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="417"/>
+        <location filename="mainwindow.cpp" line="421"/>
         <source>RSS-Reader is written by Henrik Wingerei and Marit Olsen.</source>
         <translation>RSS-Reader is written by Henrik Wingerei and Marit Olsen.</translation>
     </message>
@@ -346,7 +348,7 @@ The URL has to start with http, https or ftp.</translation>
 <context>
     <name>XMLParser</name>
     <message>
-        <location filename="xmlparser.cpp" line="50"/>
+        <location filename="xmlparser.cpp" line="49"/>
         <source>Read more here</source>
         <translation>Read more here</translation>
     </message>

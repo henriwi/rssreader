@@ -241,7 +241,11 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
         _http.abort();
     else {
         _xml.addData(_http.readAll());
-        _xmlParser->parseXml(&_xml, _query, &_url);
+        if (!_xmlParser->parseXml(&_xml, _query, &_url)) {
+            QMessageBox::warning(this, tr("Error"), tr("Was not able to download the feed. "
+                                                       "Please make sure you have entered a valid feed-adress."),
+                                 QMessageBox::Ok);
+        }
         _progressDialog->hide();
         showSystemTrayIconMessage();
     }    

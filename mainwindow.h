@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define UPDATE_FREQUENCY 3000000
+#define UPDATE_FREQUENCY 9000000
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSqlQuery>
