@@ -256,9 +256,14 @@ void MainWindow::deleteFeed()
 {
     QUrl url(ui->treeWidget->currentItem()->text(0));
 
-    _query->prepare("DELETE FROM Feed WHERE url=:stringUrl" );
-    _query->bindValue(":stringUrl", url);
-    _query->exec();
+    if (url.toString() == "All" || url.toString() == "Alle") {
+        _query->exec("DELETE FROM Feed");
+    }
+    else {
+        _query->prepare("DELETE FROM Feed WHERE url=:stringUrl" );
+        _query->bindValue(":stringUrl", url);
+        _query->exec();
+    }
 
     ui->feedView->clear();
     ui->urlLabel->clear();
