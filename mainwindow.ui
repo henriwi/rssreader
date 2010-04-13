@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1056</width>
-    <height>662</height>
+    <width>1118</width>
+    <height>668</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,6 +58,9 @@
       <string>http://vg.no/rss/create.php</string>
      </property>
     </widget>
+    <zorder>rssEdit</zorder>
+    <zorder>label</zorder>
+    <zorder>formLayoutWidget</zorder>
    </widget>
    <widget class="QGroupBox" name="urlGroupBox">
     <property name="geometry">
@@ -235,6 +238,8 @@
       </property>
      </column>
     </widget>
+    <zorder>treeWidget</zorder>
+    <zorder>formLayoutWidget</zorder>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -242,7 +247,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1056</width>
+     <width>1118</width>
      <height>21</height>
     </rect>
    </property>
