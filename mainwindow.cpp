@@ -28,19 +28,14 @@ MainWindow::MainWindow(QWidget *parent) :
     createActions();
     xmlParser = new XMLParser;
 
-    trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
-    trayIcon->show();
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+
     quitAction = new QAction(tr("Quit"), this);
 
     setWindowIcon(QIcon(":/img/windowIcon.png"));
 
+
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
-    trayIconMenu = new QMenu(this);
-    trayIconMenu->addAction(quitAction);
-    trayIcon->setContextMenu(trayIconMenu);
+    createTrayIcon();
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
@@ -98,7 +93,6 @@ void MainWindow::createActions()
     connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteFeed()));
 
     updateAct = new QAction (tr("&Update"), this);
-    ui->treeWidget->addAction(updateAct);
     updateAct->setStatusTip(tr("Update URL"));
     connect(updateAct, SIGNAL(triggered()), this, SLOT(updateRss()));
 }
@@ -262,6 +256,8 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
     else {
         xml.addData(http.readAll());
         xmlParser->parseXml(&xml, query, &url);
+
+        showSystemTrayIconMessage();
     }    
     updateTreeview();
 }
@@ -317,6 +313,14 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     case QSystemTrayIcon::Trigger:
         show();
         break;
+    case QSystemTrayIcon::Context:
+        break;
+    case QSystemTrayIcon::DoubleClick:
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    case QSystemTrayIcon::Unknown:
+        break;
     }
 }
 
@@ -334,3 +338,27 @@ void MainWindow::showErrorMessageAndCloseProgressDialog()
                          QMessageBox::Ok);
 }
 
+void MainWindow::createTrayIcon()
+{
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
+
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(updateAct);
+    trayIconMenu->addAction(quitAction);
+    trayIcon->setContextMenu(trayIconMenu);
+    trayIcon->show();
+}
+
+void MainWindow::showSystemTrayIconMessage()
+{
+    query->exec("SELECT COUNT(unread) FROM Feed");
+
+    while (query->next()) {
+        int numberOfUnreadFeeds = query->value(0).toInt();
+        trayIcon->showMessage(tr("Feeds updated"), tr("Feeds were updated, you have %1 unread feeds").arg(numberOfUnreadFeeds));
+    }
+}

@@ -37,9 +37,11 @@ private:
 
     QAction *deleteAct;
     QAction *updateAct;
+    QAction* quitAction;
 
     QMenu *menu;
     QTimer *timer;
+    QMenu* trayIconMenu;
 
     QSqlQuery *query;
     QSqlDatabase db;
@@ -50,11 +52,11 @@ private:
     QUrl url;
     QString feed;
     QSystemTrayIcon* trayIcon;
-    QAction* quitAction;
-    QMenu* trayIconMenu;
     QProgressDialog* progressDialog;
 
     void showErrorMessageAndCloseProgressDialog();
+    void createTrayIcon();
+    void showSystemTrayIconMessage();
 
 private slots:
     void on_searchButton_clicked();
