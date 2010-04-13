@@ -14,78 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTreeWidget" name="treeWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>321</width>
-      <height>621</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="palette">
-     <palette>
-      <active>
-       <colorrole role="Base">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </active>
-      <inactive>
-       <colorrole role="Base">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </inactive>
-      <disabled>
-       <colorrole role="Base">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </disabled>
-     </palette>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="sortingEnabled">
-     <bool>true</bool>
-    </property>
-    <column>
-     <property name="text">
-      <string>URL</string>
-     </property>
-     <property name="textAlignment">
-      <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Number of unread feeds</string>
-     </property>
-    </column>
-   </widget>
    <widget class="QGroupBox" name="feedGroupBox">
     <property name="geometry">
      <rect>
@@ -106,6 +34,9 @@
        <width>671</width>
        <height>431</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string>Displays the feed</string>
      </property>
     </widget>
     <widget class="QLabel" name="label">
@@ -170,7 +101,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Subscribe to a feed</string>
+         <string>Search after a feed</string>
         </property>
         <property name="text">
          <string>Search</string>
@@ -184,6 +115,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Subscribe to a feed</string>
         </property>
         <property name="text">
          <string>Add</string>
@@ -204,6 +138,9 @@
           <height>20</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Enter a feed URL or type a keyword and search after feeds</string>
+        </property>
        </widget>
       </item>
      </layout>
@@ -212,6 +149,91 @@
     <zorder>searchButton</zorder>
     <zorder>feedGroupBox</zorder>
     <zorder>gridLayoutWidget</zorder>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>301</width>
+      <height>591</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Feed list</string>
+    </property>
+    <widget class="QTreeWidget" name="treeWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>281</width>
+       <height>561</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>240</red>
+           <green>240</green>
+           <blue>240</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>240</red>
+           <green>240</green>
+           <blue>240</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>240</red>
+           <green>240</green>
+           <blue>240</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>URL</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Number of unread feeds</string>
+      </property>
+     </column>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
