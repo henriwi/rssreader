@@ -288,7 +288,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 
     ui->feedView->clear();
 
-    if (item->text(column) == "All") {
+    if (item->text(column) == "All" || item->text(column) == "Alle") {
         ui->urlLabel->setText(tr("All feeds ordered by date (max 20)"));
 
         if(_showUnreadAndReadFeeds) {

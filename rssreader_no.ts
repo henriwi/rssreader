@@ -310,6 +310,11 @@ Den må starte med http, https eller ftp.</translation>
         <translation>Søk etter feeder</translation>
     </message>
     <message>
+        <location filename="searchdialog.cpp" line="13"/>
+        <source>Search</source>
+        <translation>Søk</translation>
+    </message>
+    <message>
         <location filename="searchdialog.cpp" line="32"/>
         <source>Searching after feeds...</source>
         <translation>Søker etter feeder...</translation>

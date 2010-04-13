@@ -310,6 +310,11 @@ The URL has to start with http, https or ftp.</translation>
         <translation>Search after feeds</translation>
     </message>
     <message>
+        <location filename="searchdialog.cpp" line="13"/>
+        <source>Search</source>
+        <translation>Search</translation>
+    </message>
+    <message>
         <location filename="searchdialog.cpp" line="32"/>
         <source>Searching after feeds...</source>
         <translation>Searching after feeds...</translation>

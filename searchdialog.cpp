@@ -10,7 +10,7 @@ SearchDialog::SearchDialog(QWidget *parent, QString query) :
     searchInput = new QLineEdit;
     searchInput->setText(query);
     searchButton = new QPushButton;
-    searchButton->setText("Search");
+    searchButton->setText(tr("Search"));
     messageLabel = new QLabel;
 
     layout = new QGridLayout;
