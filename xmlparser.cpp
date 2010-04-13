@@ -8,12 +8,13 @@ XMLParser::XMLParser(QObject *parent) :
 
 }
 
-void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url, QHttp* http)
+void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
 {
-    QString title = "";
-    QString content = "";
-    QString date = "";
-    QString link = "";
+    QString title;
+    QString content;
+    QString date;
+    QString link;
+    QString feedTitle;
 
     while (!xml->atEnd()) {
         xml->readNext();
@@ -21,16 +22,19 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url, QHt
             currentTag = xml->name().toString();
         }
         else if (xml->isEndElement()) {
-            if(xml->name() == "item") {
+            if (xml->name() == "title" && currentTag != "item") {
+                feedTitle = xml->text().toString();
+            }
+            if (xml->name() == "item") {
                 Feed feed(title, content, link, date);
                 feeds.append(feed);
             }
         }
-        else if(xml->isCharacters() && !xml->isWhitespace()) {
+        else if (xml->isCharacters() && !xml->isWhitespace()) {
             if (currentTag == "title") {
                 title = "<h3 style=\"color: #363636;\">" + xml->text().toString() + "</h3>";
             }
-            else if(currentTag == "description") {
+            else if (currentTag == "description") {
                 content = xml->text().toString();
                 //content = xml->readElementText(QXmlStreamReader::IncludeChildElements);
             }
@@ -43,14 +47,14 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url, QHt
         }
     }
 
-    foreach(Feed feed, feeds) {
-        query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :boolUnread)");
+    foreach (Feed feed, feeds) {
+        query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :intUnread)");
         query->bindValue(":stringUrl", url->toString());
-        query->bindValue(":stringTitle", feed.title());
+        query->bindValue(":stringTitle", feedTitle /*feed.title()*/);
         query->bindValue(":stringContent", feed.content());
         query->bindValue(":stringDate", feed.date());
         query->bindValue(":stringLink", feed.link());
-        query->bindValue(":boolUnread", true);
+        query->bindValue(":intUnread", 1);
         query->exec();
     }
 }

@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(tr("RSS-Reader"));
+    ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
@@ -39,9 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
     timer->start(300000);          //Updates every 5 minutes
 
-    progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
-    progressDialog->setWindowModality(Qt::WindowModal);
-    connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
+    //progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
+    //progressDialog->setWindowModality(Qt::WindowModal);
+    //connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
 
     //setWindowState(Qt::WindowMaximized);
 
@@ -129,8 +130,6 @@ void MainWindow::addUrl(QUrl stringUrl)
     http.setHost(url.host());
     connectionId = http.get(url.path());
 
-    progressDialog->show();
-    progressDialog->setValue(0);
     updateTreeview();
 }
 
@@ -152,11 +151,11 @@ void MainWindow::deleteUrl(QUrl stringUrl)
     ui->rssEdit->clear();
 }
 
-void MainWindow::updateTreeview()           //legge til ny query for å hente antall unread = 1??
+void MainWindow::updateTreeview()
 {
     ui->treeWidget->clear();
 
-    query->exec("SELECT DISTINCT url FROM Feed");
+    query->exec("SELECT DISTINCT url, COUNT(unread) FROM Feed group by url");
 
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
     widgetItemAll->setText(0, "All");
@@ -165,6 +164,7 @@ void MainWindow::updateTreeview()           //legge til ny query for å hente ant
     {
         QTreeWidgetItem * widgetItem = new QTreeWidgetItem(widgetItemAll);
         widgetItem->setText(0, query->value(0).toString());
+        widgetItem->setText(1, query->value(1).toString());
     }
     ui->treeWidget->expandAll();
     ui->treeWidget->sortItems(0,Qt::AscendingOrder);
@@ -193,8 +193,7 @@ bool MainWindow::createConnection()
 void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
-    //query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
-    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
+    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
@@ -245,7 +244,6 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
             ui->rssEdit->append(query->value(3).toString());
         }
     }
-
     /*QTextCursor c = ui->rssEdit->textCursor();
     c.movePosition(QTextCursor::Start);
     ui->rssEdit->setTextCursor(c);*/
@@ -256,12 +254,11 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
 {
     //url.setUrl(ui->urlEdit->text());
 
-    if (resp.statusCode() != 200) {
+    if (resp.statusCode() != 200)
         http.abort();
-    }
     else {
         xml.addData(http.readAll());
-        xmlParser->parseXml(&xml, query, &url, &http);
+        xmlParser->parseXml(&xml, query, &url);
     }    
     updateTreeview();
 }
@@ -274,7 +271,8 @@ void MainWindow::rssLinkedClicked(QUrl url)
 void MainWindow::finished(int id, bool error)
 {
     if (error) {
-        showErrorMessageAndCloseProgressDialog();
+        qWarning("Received error during HTTP fetch.");
+
     }
     else if (id == connectionId) {
         ui->searchButton->setEnabled(true);
@@ -327,3 +325,4 @@ void MainWindow::showErrorMessageAndCloseProgressDialog()
                                                        "Please make sure you have entered a valid feed-adress."),
                          QMessageBox::Ok);
 }
+
