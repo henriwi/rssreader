@@ -30,9 +30,9 @@
      <property name="geometry">
       <rect>
        <x>15</x>
-       <y>71</y>
+       <y>51</y>
        <width>671</width>
-       <height>431</height>
+       <height>451</height>
       </rect>
      </property>
      <property name="toolTip">
@@ -43,14 +43,15 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>30</y>
+       <y>10</y>
        <width>461</width>
        <height>31</height>
       </rect>
      </property>
      <property name="styleSheet">
       <string notr="true">QLabel {
-	font: italic 16pt &quot;Arial&quot;;
+	
+	font: italic 12pt &quot;Arial&quot;;
 }</string>
      </property>
      <property name="text">
@@ -268,7 +269,11 @@
    <addaction name="menuFile"/>
    <addaction name="menuAbout"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="sizeGripEnabled">
+    <bool>true</bool>
+   </property>
+  </widget>
   <action name="actionAdd_URL">
    <property name="text">
     <string>Add URL</string>
