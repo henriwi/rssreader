@@ -296,8 +296,16 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionShow_all_feeds"/>
     <addaction name="actionShow_only_unread_feeds"/>
    </widget>
+   <widget class="QMenu" name="menuLanguage">
+    <property name="title">
+     <string>Language</string>
+    </property>
+    <addaction name="actionEnglish"/>
+    <addaction name="actionNorwegian"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuFeed"/>
+   <addaction name="menuLanguage"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -373,6 +381,22 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionEnglish">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>English</string>
+   </property>
+  </action>
+  <action name="actionNorwegian">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Norwegian</string>
    </property>
   </action>
  </widget>

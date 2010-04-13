@@ -26,6 +26,7 @@ public:
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
+    void retranslateUi();
 
 private:
     bool createConnection();
@@ -63,6 +64,9 @@ private:
 
     bool _showUnreadAndReadFeeds;
 
+    QTranslator* _appTranslator;
+    QTranslator* _qtTranslator;
+
 private slots:
     void on_searchButton_clicked();
     void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
@@ -77,6 +81,8 @@ private slots:
     void showAllFeeds();
     void showOnlyUnreadFeeds();
     void showAbout();
+    void changeToNorwegian();
+    void changeToEnglish();
 };
 
 #endif // MAINWINDOW_H

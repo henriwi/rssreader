@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>translations/rssreader_en.qm</file>
+        <file>translations/rssreader_no.qm</file>
+    </qresource>
+</RCC>

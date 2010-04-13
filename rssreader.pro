@@ -17,4 +17,7 @@ HEADERS += mainwindow.h \
     feed.h \
     searchdialog.h
 FORMS += mainwindow.ui
-RESOURCES += images.qrc
+RESOURCES += images.qrc \
+    translations.qrc
+TRANSLATIONS += rssreader_no.ts \
+    rssreader_en.ts

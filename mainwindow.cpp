@@ -14,6 +14,13 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(tr("RSS-Reader"));
     setWindowIcon(QIcon(":/img/windowIcon.png"));
 
+    _appTranslator = new QTranslator;
+    _qtTranslator = new QTranslator;
+    qApp->installTranslator(_appTranslator);
+    qApp->installTranslator(_qtTranslator);
+    ui->actionEnglish->setDisabled(true);
+    ui->actionNorwegian->setEnabled(true);
+
     ui->treeWidget->header()->resizeSection(0, 300);
 
     ui->actionShow_all_feeds->setChecked(true);
@@ -33,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionShow_only_unread_feeds, SIGNAL(triggered()), this, SLOT(showOnlyUnreadFeeds()));
     connect(ui->actionClose, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(ui->actionAbout_Rss_reader, SIGNAL(triggered()), this, SLOT(showAbout()));
+    connect(ui->actionEnglish, SIGNAL(triggered()), this, SLOT(changeToEnglish()));
+    connect(ui->actionNorwegian, SIGNAL(triggered()), this, SLOT(changeToNorwegian()));
 
     _xmlParser = new XMLParser;
 
@@ -86,6 +95,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
+void MainWindow::retranslateUi()
+{
+    setWindowTitle(tr("RSS-Reader"));;
+    _progressDialog->setWindowTitle(tr("Downloading feed..."));
+    _updateAct->setText(tr("Update"));
+    _quitAction->setText(tr("Quit"));
+}
+
 void MainWindow::showContextMenu(QPoint eventPosition)
 {
     QPoint globalPos = ui->treeWidget->mapToGlobal(eventPosition);
@@ -122,7 +139,7 @@ bool MainWindow::createConnection()
                               tr("Unable to establish a database connection.\n"
                                  "This application needs SQLite support. Please read "
                                  "the Qt SQL driver documentation for more information\n\n"
-                                 "Click Cancel to exit."), QMessageBox::Cancel);
+                                 "Click OK to exit."), QMessageBox::Ok);
         return false;
     }
 
@@ -156,10 +173,10 @@ void MainWindow::on_addButton_clicked()
 {
     _url.setUrl(ui->urlEdit->text());
     if (!validUrl(_url.toString())) {
-        QMessageBox::warning(this, qApp->tr("Not valid URL"),
-                             qApp->tr("The URL is not valid,\n"
+        QMessageBox::warning(this, tr("Not valid URL"),
+                             tr("The URL is not valid,\n"
                                       "The URL has to start with http, https or ftp."),
-                             QMessageBox::Cancel);
+                             QMessageBox::Ok);
     }
     else {
         addUrl(_url);
@@ -185,7 +202,7 @@ void MainWindow::updateTreeview()
     _query->exec("SELECT COUNT(unread) FROM Feed");
 
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
-    widgetItemAll->setText(0, "All");
+    widgetItemAll->setText(0, tr("All"));
     while (_query->next()) {
         widgetItemAll->setText(1, _query->value(0).toString());
     }
@@ -399,4 +416,20 @@ void MainWindow::showAbout()
 {
     QMessageBox::information(this, tr("About RSS-Reader"), tr("RSS-Reader is written by Henrik Wingerei and Marit Olsen."),
                              QMessageBox::Ok);
+}
+
+void MainWindow::changeToNorwegian()
+{
+    _appTranslator->load(":/translations/rssreader_no");
+    ui->actionNorwegian->setDisabled(true);
+    ui->actionEnglish->setEnabled(true);
+    retranslateUi();
+}
+
+void MainWindow::changeToEnglish()
+{
+    _appTranslator->load(":/translations/rssreader_en");
+    ui->actionEnglish->setDisabled(true);
+    ui->actionNorwegian->setEnabled(true);
+    retranslateUi();
 }
