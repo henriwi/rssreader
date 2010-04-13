@@ -19,7 +19,7 @@ XMLParser::XMLParser(QObject *parent) :
     months.insert("Des", "12");
 }
 
-void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
+bool XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
 {
     QString title = "";
     QString content = "";
@@ -57,6 +57,10 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
         }
     }
 
+    if(feeds.isEmpty()) {
+        return false;
+    }
+
     foreach(Feed feed, feeds) {
         query->prepare("INSERT INTO Feed (url, title, content, date, link, linkUrl, unread) VALUES (:stringUrl, :stringTitle, :stringContent, DATETIME(:stringDate), :stringLink, :stringLinkUrl, :intUnread)");
         query->bindValue(":stringUrl", url->toString());
@@ -68,6 +72,8 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
         query->bindValue(":intUnread", 1);
         query->exec();
     }
+
+    return true;
 }
 
 QString XMLParser::extractAndParseDate(QString pubDate)

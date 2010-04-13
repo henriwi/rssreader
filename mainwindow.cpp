@@ -7,52 +7,58 @@
 
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+        QMainWindow(parent),
+        ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     setWindowTitle(tr("RSS-Reader"));
-    ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
+    setWindowIcon(QIcon(":/img/windowIcon.png"));
+
+    ui->treeWidget->header()->resizeSection(0, 300);
 
     ui->actionShow_all_feeds->setChecked(true);
-    showUnreadAndReadFeeds = true;
-    createActions();
+    _showUnreadAndReadFeeds = true;
 
-    connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
-    connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
+    createActions();
+    createConnection();
+    createTrayIcon();
+
+    connect(&_http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
+    connect(&_http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->feedView, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
     connect(ui->actionUpdate, SIGNAL(triggered()), this, SLOT(updateRss()));
     connect(ui->actionAdd_feed, SIGNAL(triggered()), this, SLOT(on_addButton_clicked()));
     connect(ui->actionSearch, SIGNAL(triggered()), this, SLOT(on_searchButton_clicked()));
     connect(ui->actionShow_all_feeds, SIGNAL(triggered()), this, SLOT(showAllFeeds()));
     connect(ui->actionShow_only_unread_feeds, SIGNAL(triggered()), this, SLOT(showOnlyUnreadFeeds()));
+    connect(ui->actionClose, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(ui->actionAbout_Rss_reader, SIGNAL(triggered()), this, SLOT(showAbout()));
 
-    createConnection();
-    xmlParser = new XMLParser;
+    _xmlParser = new XMLParser;
 
-    setWindowIcon(QIcon(":/img/windowIcon.png"));
-
-
-    createTrayIcon();
-
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
-    timer->start(UPDATE_FREQUENCY);
+    _timer = new QTimer(this);
+    connect(_timer, SIGNAL(timeout()), this, SLOT(updateRss()));
+    _timer->start(UPDATE_FREQUENCY);
 
     connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    progressDialog = new QProgressDialog(tr("Downloading feed..."), 0, 0, 0, this);
-    progressDialog->setWindowModality(Qt::WindowModal);
-    //connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
+    _progressDialog = new QProgressDialog(tr("Downloading feed..."), 0, 0, 0, this);
+    _progressDialog->setWindowModality(Qt::WindowModal);
 }
 
 MainWindow::~MainWindow()
 {
-    db.close();
-    delete query;
-    delete timer;
-    delete xmlParser;
+    _db.close();
+    delete _query;
+    delete _timer;
+    delete _xmlParser;
+    delete _deleteAct;
+    delete _updateAct;
+    delete _quitAction;
+    delete _trayIconMenu;
+    delete _trayIcon;
+    delete _progressDialog;
     delete ui;
 }
 
@@ -68,44 +74,95 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (_trayIcon->isVisible()) {
+        _trayIcon->showMessage(tr("Information"),
+                               tr("The program will keep running in the "
+                                  "system tray. Right click on the system tray icon and choose quit to exit."),
+                               QSystemTrayIcon::Information);
+        hide();
+        event->ignore();
+    }
+}
+
 void MainWindow::showContextMenu(QPoint eventPosition)
 {
     QPoint globalPos = ui->treeWidget->mapToGlobal(eventPosition);
 
     if(ui->treeWidget->itemAt(eventPosition)) {
-        menu = new QMenu(ui->treeWidget);
-        menu->addAction(updateAct);
-        menu->addAction(deleteAct);
-        menu->exec(globalPos);
+        QMenu menu(ui->treeWidget);
+        menu.addAction(_updateAct);
+        menu.addAction(_deleteAct);
+        menu.exec(globalPos);
     }
 }
 
 void MainWindow::createActions()
 {
-    deleteAct = new QAction (tr("Delete"), this);
-    deleteAct->setToolTip(tr("Delete the selected URL"));
-    connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteFeed()));
+    _deleteAct = new QAction (tr("Delete"), this);
+    _deleteAct->setToolTip(tr("Delete the selected URL"));
+    connect(_deleteAct, SIGNAL(triggered()), this, SLOT(deleteFeed()));
 
-    updateAct = new QAction (tr("Update"), this);
-    updateAct->setToolTip(tr("Update all the feeds"));
-    connect(updateAct, SIGNAL(triggered()), this, SLOT(updateRss()));
+    _updateAct = new QAction (tr("Update"), this);
+    _updateAct->setToolTip(tr("Update all the feeds"));
+    connect(_updateAct, SIGNAL(triggered()), this, SLOT(updateRss()));
 
-    quitAction = new QAction(tr("Quit"), this);
-    quitAction->setToolTip(tr("Exit RSS-reader"));
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    _quitAction = new QAction(tr("Quit"), this);
+    _quitAction->setToolTip(tr("Exit RSS-reader"));
+    connect(_quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+}
+
+bool MainWindow::createConnection()
+{
+    _db = QSqlDatabase::addDatabase("QSQLITE");
+    _db.setDatabaseName("rssreader");
+    if (!_db.open()) {
+        QMessageBox::critical(0, tr("Cannot open database"),
+                              tr("Unable to establish a database connection.\n"
+                                 "This application needs SQLite support. Please read "
+                                 "the Qt SQL driver documentation for more information\n\n"
+                                 "Click Cancel to exit."), QMessageBox::Cancel);
+        return false;
+    }
+
+    setupDatabase();
+    return true;
+}
+
+void MainWindow::setupDatabase()
+{
+    _query = new QSqlQuery;
+    _query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date datetime, link varchar, linkUrl varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
+    updateTreeview();
+}
+
+void MainWindow::createTrayIcon()
+{
+    _trayIcon = new QSystemTrayIcon(this);
+    _trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
+
+    connect(_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+
+    _trayIconMenu = new QMenu(this);
+    _trayIconMenu->addAction(_updateAct);
+    _trayIconMenu->addAction(_quitAction);
+    _trayIcon->setContextMenu(_trayIconMenu);
+    _trayIcon->show();
 }
 
 void MainWindow::on_addButton_clicked()
 {
-    url.setUrl(ui->urlEdit->text());
-    if (!validUrl(url.toString())) {
-        QMessageBox::warning(this, qApp->tr("Wrong URL"),
-                             qApp->tr("The URL is wrong\n"
-                                      "URL has to start with http, https or ftp."),
+    _url.setUrl(ui->urlEdit->text());
+    if (!validUrl(_url.toString())) {
+        QMessageBox::warning(this, qApp->tr("Not valid URL"),
+                             qApp->tr("The URL is not valid,\n"
+                                      "The URL has to start with http, https or ftp."),
                              QMessageBox::Cancel);
     }
     else {
-        addUrl(url);
+        addUrl(_url);
     }
 }
 
@@ -121,88 +178,82 @@ bool MainWindow::validUrl(QString stringUrl)
     }
 }
 
-void MainWindow::addUrl(QUrl stringUrl)
-{
-    progressDialog->setValue(0);
-    progressDialog->show();
-
-    ui->feedView->clear();
-    xml.clear();
-
-    url.setUrl(stringUrl.toString());
-    http.setHost(url.host());
-    connectionId = http.get(url.path());
-
-    updateTreeview();
-    ui->urlEdit->clear();
-}
-
-void MainWindow::deleteFeed()
-{
-    QUrl url(ui->treeWidget->currentItem()->text(0));
-
-    query->prepare("DELETE FROM Feed WHERE url=:stringUrl" );
-    query->bindValue(":stringUrl", url);
-    query->exec();
-
-    ui->feedView->clear();
-    ui->urlLabel->clear();
-    updateTreeview();
-}
-
 void MainWindow::updateTreeview()
 {
     ui->treeWidget->clear();
 
-    query->exec("SELECT DISTINCT url, COUNT(unread) FROM Feed group by url");
+    _query->exec("SELECT COUNT(unread) FROM Feed");
 
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
     widgetItemAll->setText(0, "All");
+    while (_query->next()) {
+        widgetItemAll->setText(1, _query->value(0).toString());
+    }
 
-    while (query->next()) {
+    _query->exec("SELECT DISTINCT url, COUNT(unread) FROM Feed group by url");
+    while (_query->next()) {
         QTreeWidgetItem * widgetItem = new QTreeWidgetItem(widgetItemAll);
-        widgetItem->setText(0, query->value(0).toString());
-        widgetItem->setText(1, query->value(1).toString());
+        widgetItem->setToolTip(0, _query->value(0).toString());
+        widgetItem->setText(0, _query->value(0).toString());
+        widgetItem->setText(1, _query->value(1).toString());
     }
 
     ui->treeWidget->expandAll();
     ui->treeWidget->sortItems(0,Qt::AscendingOrder);
 }
 
-bool MainWindow::createConnection()
- {
-    db = QSqlDatabase::addDatabase("QSQLITE");
-     db.setDatabaseName("rssreader");
-     if (!db.open()) {
-         QMessageBox::critical(0, qApp->tr("Cannot open database"),
-             qApp->tr("Unable to establish a database connection.\n"
-                      "This example needs SQLite support. Please read "
-                      "the Qt SQL driver documentation for information how "
-                      "to build it.\n\n"
-                      "Click Cancel to exit."), QMessageBox::Cancel);
-         return false;
-     }
-
-     setupDatabase();
-     return true;
- }
-
-void MainWindow::setupDatabase()
+void MainWindow::addUrl(QUrl stringUrl)
 {
-    query = new QSqlQuery;
-    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date datetime, link varchar, linkUrl varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
+    _progressDialog->setValue(0);
+    _progressDialog->show();
+
+    ui->feedView->clear();
+    _xml.clear();
+
+    _url.setUrl(stringUrl.toString());
+    _http.setHost(_url.host());
+    _connectionId = _http.get(_url.path());
+
+    updateTreeview();
+    ui->urlEdit->clear();
+}
+
+void MainWindow::readData(const QHttpResponseHeader &resp)
+{
+    if (resp.statusCode() != 200)
+        _http.abort();
+    else {
+        _xml.addData(_http.readAll());
+        _xmlParser->parseXml(&_xml, _query, &_url);
+        _progressDialog->hide();
+        showSystemTrayIconMessage();
+    }    
+    updateTreeview();
+}
+
+void MainWindow::deleteFeed()
+{
+    QUrl url(ui->treeWidget->currentItem()->text(0));
+
+    _query->prepare("DELETE FROM Feed WHERE url=:stringUrl" );
+    _query->bindValue(":stringUrl", url);
+    _query->exec();
+
+    ui->feedView->clear();
+    ui->urlLabel->clear();
     updateTreeview();
 }
 
 void MainWindow::updateRss()
 {
-    query->exec("SELECT DISTINCT url FROM Feed");
+    ui->urlLabel->clear();
+    _query->exec("SELECT DISTINCT url FROM Feed");
 
-    while (query->next()) {
-        xml.clear();
-        url.setUrl(query->value(0).toString());
-        http.setHost(url.host());
-        connectionId = http.get(url.path());
+    while (_query->next()) {
+        _xml.clear();
+        _url.setUrl(_query->value(0).toString());
+        _http.setHost(_url.host());
+        _connectionId = _http.get(_url.path());
     }
 
     ui->feedView->clear();
@@ -219,44 +270,44 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
     if (item->text(column) == "All") {
         ui->urlLabel->setText(tr("All feeds ordered by date (max 20)"));
 
-        if(showUnreadAndReadFeeds) {
-            query->exec("SELECT title, date, content, link FROM Feed ORDER BY date DESC LIMIT 20");
+        if(_showUnreadAndReadFeeds) {
+            _query->exec("SELECT title, date, content, link FROM Feed ORDER BY date DESC LIMIT 20");
         }
         else {
-            query->exec("SELECT title, date, content, link FROM Feed WHERE unread = 1 ORDER BY date DESC LIMIT 20");
+            _query->exec("SELECT title, date, content, link FROM Feed WHERE unread = 1 ORDER BY date DESC LIMIT 20");
         }
 
-        while (query->next())  {
-            output.append(query->value(0).toString());
-            output.append(query->value(1).toString());
-            output.append(query->value(2).toString());
-            output.append(query->value(3).toString());
+        while (_query->next())  {
+            output.append(_query->value(0).toString());
+            output.append(_query->value(1).toString());
+            output.append(_query->value(2).toString());
+            output.append(_query->value(3).toString());
         }
     }
     else {
         ui->urlLabel->setText(url.toString());
 
-        if(showUnreadAndReadFeeds) {
-            query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url ORDER BY date DESC");
+        if(_showUnreadAndReadFeeds) {
+            _query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url ORDER BY date DESC");
         }
         else {
-            query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url AND unread = 1 ORDER BY date DESC");
+            _query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url AND unread = 1 ORDER BY date DESC");
         }
 
-        query->bindValue(":url", url.toString());
-        query->exec();
+        _query->bindValue(":url", url.toString());
+        _query->exec();
 
-        while (query->next()) {
-            output.append(query->value(0).toString());
-            output.append(query->value(1).toString());
-            output.append(query->value(2).toString());
+        while (_query->next()) {
+            output.append(_query->value(0).toString());
+            output.append(_query->value(1).toString());
+            output.append(_query->value(2).toString());
 
             // If the feed has been read, change the font-color
-            if(!query->value(5).toInt()) {
-                output.append("<a style=\"color: #363636;\" href='" + query->value(4).toString() + "'>" + tr("Read more here") + "</a>");
+            if(!_query->value(5).toInt()) {
+                output.append("<a style=\"color: #363636;\" href='" + _query->value(4).toString() + "'>" + tr("Read more here") + "</a>");
             }
             else {
-                output.append(query->value(3).toString());
+                output.append(_query->value(3).toString());
             }
         }
     }
@@ -264,33 +315,21 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
     ui->feedView->setHtml(output.toHtml());
 }
 
-void MainWindow::readData(const QHttpResponseHeader &resp)
-{
-    if (resp.statusCode() != 200)
-        http.abort();
-    else {
-        xml.addData(http.readAll());
-        xmlParser->parseXml(&xml, query, &url);
-        progressDialog->hide();
-        showSystemTrayIconMessage();
-    }    
-    updateTreeview();
-}
-
 void MainWindow::rssLinkedClicked(QUrl url)
 {
     QDesktopServices::openUrl(url);
-    query->prepare("UPDATE Feed SET unread=NULL WHERE linkUrl=:linkUrl");
-    query->bindValue(":linkUrl", url.toString());
-    query->exec();
+    _query->prepare("UPDATE Feed SET unread=NULL WHERE linkUrl=:linkUrl");
+    _query->bindValue(":linkUrl", url.toString());
+    _query->exec();
     updateTreeview();
 }
 
 void MainWindow::finished(int id, bool error)
 {
     if (error) {
-        QMessageBox::warning(this, tr("Downloaderror i finished"), tr("%1Was not able to download the feed. "
-                                                           "Please make sure you have entered a valid feed-adress.").arg(http.errorString()),
+        _progressDialog->hide();
+        QMessageBox::warning(this, tr("Error"), tr("Was not able to download the feed. "
+                                                   "Please make sure you have entered a valid feed-adress."),
                              QMessageBox::Ok);
     }
 }
@@ -302,18 +341,6 @@ void MainWindow::on_searchButton_clicked()
     if(searchdialog.exec() == QDialog::Accepted) {
         QUrl url = searchdialog.feedUrl();
         addUrl(url);
-    }
-}
-
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    if (trayIcon->isVisible()) {
-        trayIcon->showMessage(tr("Information"),
-                                 tr("The program will keep running in the "
-                                    "system tray. Right click on the system tray icon and choose quit to exit."),
-                                 QSystemTrayIcon::Information);
-        hide();
-        event->ignore();
     }
 }
 
@@ -334,44 +361,23 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWindow::downloadFeedProgress(int done, int total)
-{
-    progressDialog->setMaximum(total);
-    progressDialog->setValue(done);
-}
-
 void MainWindow::showErrorMessageAndCloseProgressDialog()
 {
-    progressDialog->hide();
-    QMessageBox::warning(this, tr("Downloaderror i showErrorMessageAndCLose..."), tr("Was not able to download the feed. "
-                                                       "Please make sure you have entered a valid feed-adress."),
+    _progressDialog->hide();
+    QMessageBox::warning(this, tr("Error"), tr("Was not able to download the feed. "
+                                               "Please make sure you have entered a valid feed-adress."),
                          QMessageBox::Ok);
-}
-
-void MainWindow::createTrayIcon()
-{
-    trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
-
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-
-    trayIconMenu = new QMenu(this);
-    trayIconMenu->addAction(updateAct);
-    trayIconMenu->addAction(quitAction);
-    trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->show();
 }
 
 void MainWindow::showSystemTrayIconMessage()
 {
-    query->exec("SELECT COUNT(unread) FROM Feed");
+    _query->exec("SELECT COUNT(unread) FROM Feed");
 
-    while (query->next()) {
-        int numberOfUnreadFeeds = query->value(0).toInt();
-        trayIcon->showMessage(tr("Feeds updated"),
-                              tr("Feeds were updated, you have %1 unread feeds").arg(numberOfUnreadFeeds),
-                              QSystemTrayIcon::Information);
+    while (_query->next()) {
+        int numberOfUnreadFeeds = _query->value(0).toInt();
+        _trayIcon->showMessage(tr("Feeds updated"),
+                               tr("Feeds were updated, you have %1 unread feeds").arg(numberOfUnreadFeeds),
+                               QSystemTrayIcon::Information);
     }
 }
 
@@ -379,12 +385,18 @@ void MainWindow::showAllFeeds()
 {
     ui->actionShow_all_feeds->setChecked(true);
     ui->actionShow_only_unread_feeds->setCheckable(false);
-    showUnreadAndReadFeeds = true;
+    _showUnreadAndReadFeeds = true;
 }
 
 void MainWindow::showOnlyUnreadFeeds()
 {
     ui->actionShow_only_unread_feeds->setCheckable(true);
     ui->actionShow_all_feeds->setChecked(false);
-    showUnreadAndReadFeeds = false;
+    _showUnreadAndReadFeeds = false;
+}
+
+void MainWindow::showAbout()
+{
+    QMessageBox::information(this, tr("About RSS-Reader"), tr("RSS-Reader is written by Henrik Wingerei and Marit Olsen."),
+                             QMessageBox::Ok);
 }

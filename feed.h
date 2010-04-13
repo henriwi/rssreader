@@ -19,7 +19,6 @@ public:
     void setLink(QString link);
     void setLinkUrl(QString linkUrl);
     void setDate(QString date);
-    QString toString();
 
 signals:
 

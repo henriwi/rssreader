@@ -63,8 +63,3 @@ void Feed::setDate(QString date)
 {
     this->_date = date;
 }
-
-QString Feed::toString()
-{
-    return _title + _date + _content + _linkUrl +  _link;
-}
