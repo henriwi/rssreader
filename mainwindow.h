@@ -8,6 +8,7 @@
 #include <QHttp>
 #include "xmlparser.h"
 #include "searchdialog.h"
+#include "feed.h"
 
 namespace Ui
 {
@@ -53,6 +54,9 @@ private:
     QSystemTrayIcon* trayIcon;
     QAction* quitAction;
     QMenu* trayIconMenu;
+    QProgressDialog* progressDialog;
+
+    void showErrorMessageAndCloseProgressDialog();
 
 private slots:
     void on_searchButton_clicked();
@@ -64,6 +68,7 @@ private slots:
     void finished(int id, bool error);
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void updateRss();
+    void downloadFeedProgress(int done, int total);
 };
 
 #endif // MAINWINDOW_H
