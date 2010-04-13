@@ -146,7 +146,7 @@ void MainWindow::deleteUrl(QUrl stringUrl)
     ui->rssEdit->clear();
 }
 
-void MainWindow::updateTreeview()           //legge til ny query for å hente antall unread = 1??
+void MainWindow::updateTreeview()
 {
     ui->treeWidget->clear();
 
