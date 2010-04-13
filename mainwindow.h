@@ -54,6 +54,8 @@ private:
     QSystemTrayIcon* trayIcon;
     QProgressDialog* progressDialog;
 
+    bool showUnreadAndReadFeeds;
+
     void showErrorMessageAndCloseProgressDialog();
     void createTrayIcon();
     void showSystemTrayIconMessage();
@@ -70,6 +72,8 @@ private slots:
     void downloadFeedProgress(int done, int total);
     void showContextMenu(QPoint eventPosition);
     void deleteFeed();
+    void showAllFeeds();
+    void showOnlyUnreadFeeds();
 };
 
 #endif // MAINWINDOW_H

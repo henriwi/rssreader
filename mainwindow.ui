@@ -23,9 +23,9 @@
    <widget class="QGroupBox" name="feedGroupBox">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>410</x>
       <y>90</y>
-      <width>701</width>
+      <width>631</width>
       <height>511</height>
      </rect>
     </property>
@@ -37,7 +37,7 @@
       <rect>
        <x>15</x>
        <y>51</y>
-       <width>671</width>
+       <width>601</width>
        <height>451</height>
       </rect>
      </property>
@@ -68,9 +68,9 @@
    <widget class="QGroupBox" name="urlGroupBox">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>410</x>
       <y>10</y>
-      <width>701</width>
+      <width>631</width>
       <height>71</height>
      </rect>
     </property>
@@ -88,7 +88,7 @@
       <rect>
        <x>40</x>
        <y>20</y>
-       <width>651</width>
+       <width>581</width>
        <height>41</height>
       </rect>
      </property>
@@ -158,7 +158,7 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>301</width>
+      <width>371</width>
       <height>591</height>
      </rect>
     </property>
@@ -170,7 +170,7 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>281</width>
+       <width>351</width>
        <height>561</height>
       </rect>
      </property>
@@ -326,6 +326,9 @@ p, li { white-space: pre-wrap; }
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show all</string>
    </property>
@@ -342,7 +345,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Show only unread</string>

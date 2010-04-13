@@ -1,7 +1,5 @@
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 #include <QMessageBox>
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -15,6 +13,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setWindowTitle(tr("RSS-Reader"));
     ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
+
+    ui->actionShow_all_feeds->setChecked(true);
+    showUnreadAndReadFeeds = true;
     createActions();
 
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
@@ -23,9 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionUpdate, SIGNAL(triggered()), this, SLOT(updateRss()));
     connect(ui->actionAdd_feed, SIGNAL(triggered()), this, SLOT(on_addButton_clicked()));
     connect(ui->actionSearch, SIGNAL(triggered()), this, SLOT(on_searchButton_clicked()));
+    connect(ui->actionShow_all_feeds, SIGNAL(triggered()), this, SLOT(showAllFeeds()));
+    connect(ui->actionShow_only_unread_feeds, SIGNAL(triggered()), this, SLOT(showOnlyUnreadFeeds()));
 
     createConnection();
-    createActions();
     xmlParser = new XMLParser;
 
 
@@ -33,24 +35,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowIcon(QIcon(":/img/windowIcon.png"));
 
-
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     createTrayIcon();
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
-    timer->start(300000);          //Updates every 5 minutes
+    timer->start(300000);
 
     connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
+    progressDialog = new QProgressDialog(tr("Downloading feed..."), 0, 0, 0, this);
     progressDialog->setWindowModality(Qt::WindowModal);
     //connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
-    progressDialog->setMaximum(0);
-
-    //setWindowState(Qt::WindowMaximized);
-
 }
 
 MainWindow::~MainWindow()
@@ -127,10 +124,11 @@ void MainWindow::addUrl(QUrl stringUrl)
 {
     progressDialog->setValue(0);
     progressDialog->show();
+
     ui->feedView->clear();
     xml.clear();
+
     url.setUrl(stringUrl.toString());
-    ui->searchButton->setDisabled(true);
     http.setHost(url.host());
     connectionId = http.get(url.path());
 
@@ -214,11 +212,19 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     QTextEdit output;
     QUrl url(item->text(0));
-    ui->urlLabel->setText(url.toString());
+
     ui->feedView->clear();
 
     if (item->text(column) == "All") {
-        query->exec("SELECT title, date, content, link FROM Feed ORDER BY date DESC");
+        ui->urlLabel->setText(tr("All feeds ordered by date (max 20)"));
+
+        if(showUnreadAndReadFeeds) {
+            query->exec("SELECT title, date, content, link FROM Feed ORDER BY date DESC LIMIT 20");
+        }
+        else {
+            query->exec("SELECT title, date, content, link FROM Feed WHERE unread = 1 ORDER BY date DESC LIMIT 20");
+        }
+
         while (query->next())  {
             output.append(query->value(0).toString());
             output.append(query->value(1).toString());
@@ -227,7 +233,15 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
         }
     }
     else {
-        query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url ORDER BY date DESC");
+        ui->urlLabel->setText(url.toString());
+
+        if(showUnreadAndReadFeeds) {
+            query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url ORDER BY date DESC");
+        }
+        else {
+            query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url AND unread = 1 ORDER BY date DESC");
+        }
+
         query->bindValue(":url", url.toString());
         query->exec();
 
@@ -256,7 +270,7 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
     else {
         xml.addData(http.readAll());
         xmlParser->parseXml(&xml, query, &url);
-
+        progressDialog->close();
         showSystemTrayIconMessage();
     }    
     updateTreeview();
@@ -274,12 +288,12 @@ void MainWindow::rssLinkedClicked(QUrl url)
 void MainWindow::finished(int id, bool error)
 {
     if (error) {
-        qWarning("Received error during HTTP fetch.");
-
+        QMessageBox::warning(this, tr("Downloaderror"), tr("Was not able to download the feed. "
+                                                           "Please make sure you have entered a valid feed-adress."),
+                             QMessageBox::Ok);
     }
     else if (id == connectionId) {
-        progressDialog->close();
-        ui->searchButton->setEnabled(true);
+
     }
 }
 
@@ -289,7 +303,6 @@ void MainWindow::on_searchButton_clicked()
 
     if(searchdialog.exec() == QDialog::Accepted) {
         QUrl url = searchdialog.feedUrl();
-        ui->urlEdit->setText(url.toString());
         addUrl(url);
     }
 }
@@ -297,11 +310,10 @@ void MainWindow::on_searchButton_clicked()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (trayIcon->isVisible()) {
-        QMessageBox::information(this, tr("Systemtray information"),
+        trayIcon->showMessage(tr("Information"),
                                  tr("The program will keep running in the "
-                                    "system tray. To terminate the program, "
-                                    "right click on the system tray icon and "
-                                    "choose <b>Quit</b>."));
+                                    "system tray. Right click on the system tray icon and choose quit to exit."),
+                                 QSystemTrayIcon::Information);
         hide();
         event->ignore();
     }
@@ -359,6 +371,22 @@ void MainWindow::showSystemTrayIconMessage()
 
     while (query->next()) {
         int numberOfUnreadFeeds = query->value(0).toInt();
-        trayIcon->showMessage(tr("Feeds updated"), tr("Feeds were updated, you have %1 unread feeds").arg(numberOfUnreadFeeds));
+        trayIcon->showMessage(tr("Feeds updated"),
+                              tr("Feeds were updated, you have %1 unread feeds").arg(numberOfUnreadFeeds),
+                              QSystemTrayIcon::Information);
     }
+}
+
+void MainWindow::showAllFeeds()
+{
+    ui->actionShow_all_feeds->setChecked(true);
+    ui->actionShow_only_unread_feeds->setCheckable(false);
+    showUnreadAndReadFeeds = true;
+}
+
+void MainWindow::showOnlyUnreadFeeds()
+{
+    ui->actionShow_only_unread_feeds->setCheckable(true);
+    ui->actionShow_all_feeds->setChecked(false);
+    showUnreadAndReadFeeds = false;
 }
