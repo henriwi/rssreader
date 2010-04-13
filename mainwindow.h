@@ -25,7 +25,6 @@ public:
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
-    void contextMenuEvent(QContextMenuEvent *event);
 
 private:
     Ui::MainWindow *ui;
@@ -69,6 +68,7 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void updateRss();
     void downloadFeedProgress(int done, int total);
+    void showContextMenu(QPoint eventPosition);
 };
 
 #endif // MAINWINDOW_H

@@ -15,14 +15,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setWindowTitle(tr("RSS-Reader"));
     ui->treeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
+    createActions();
 
     connect(&http, SIGNAL(readyRead(QHttpResponseHeader)), this, SLOT(readData(QHttpResponseHeader)));
     connect(&http, SIGNAL(requestFinished(int,bool)), this, SLOT(finished(int,bool)));
     connect(ui->rssEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(rssLinkedClicked(QUrl)));
     connect (ui->actionUpdate_RSS_feed, SIGNAL (activated()), this, SLOT (updateRss()));
+
     createConnection();
     createActions();
     xmlParser = new XMLParser;
+
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon(QIcon(":/img/trayIcon.png"));
     trayIcon->show();
@@ -40,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
     timer->start(300000);          //Updates every 5 minutes
+
+    connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
     //progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
     //progressDialog->setWindowModality(Qt::WindowModal);
@@ -70,19 +76,17 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
-void MainWindow::contextMenuEvent(QContextMenuEvent *event)
- {
-    QPoint globalPos = ui->treeWidget->mapToGlobal(event->globalPos());
-    if (ui->treeWidget->itemAt(event->pos()))
-    {
-        menu = new QMenu(this);
+void MainWindow::showContextMenu(QPoint eventPosition)
+{
+    QPoint globalPos = ui->treeWidget->mapToGlobal(eventPosition);
+
+    if(ui->treeWidget->itemAt(eventPosition)) {
+        menu = new QMenu(ui->treeWidget);
         menu->addAction(updateAct);
         menu->addAction(deleteAct);
-        //menu->exec(event->globalPos());
         menu->exec(globalPos);
     }
-
- }
+}
 
 void MainWindow::createActions()
 {
@@ -91,6 +95,7 @@ void MainWindow::createActions()
     connect (deleteAct, SIGNAL (triggered()), this, SLOT (on_deleteButton_clicked()));
 
     updateAct = new QAction (tr("&Update"), this);
+    ui->treeWidget->addAction(updateAct);
     updateAct->setStatusTip(tr("Update URL"));
     connect (updateAct, SIGNAL (triggered()), this, SLOT (updateRss()));
 }
