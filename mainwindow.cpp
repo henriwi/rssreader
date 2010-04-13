@@ -150,15 +150,20 @@ void MainWindow::updateTreeview()           //legge til ny query for å hente ant
 {
     ui->treeWidget->clear();
 
-    query->exec("SELECT DISTINCT url FROM Feed");
+    query->exec("SELECT DISTINCT url, COUNT(unread) FROM Feed group by url");
+    QSqlQuery *localQuery = new QSqlQuery;
 
     QTreeWidgetItem * widgetItemAll = new QTreeWidgetItem(ui->treeWidget);
     widgetItemAll->setText(0, "All");
 
     while (query->next())
     {
+        /*localQuery->prepare("SELECT COUNT(unread) FROM Feed WHERE unread=1 AND url=:stringUrl");
+        localQuery->bindValue(":stringUrl", query->isValid().toString());
+        localQuery->exec();*/
+
         QTreeWidgetItem * widgetItem = new QTreeWidgetItem(widgetItemAll);
-        widgetItem->setText(0, query->value(0).toString());
+        widgetItem->setText(0, query->value(0).toString() + query->value(1).toString());
     }
     ui->treeWidget->expandAll();
     ui->treeWidget->sortItems(0,Qt::AscendingOrder);
@@ -187,8 +192,7 @@ bool MainWindow::createConnection()
 void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
-    //query->exec("CREATE TABLE IF NOT EXISTS Url (url varchar UNIQUE NOT NULL, CONSTRAINT Url PRIMARY KEY (url))");
-    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread boolean , CONSTRAINT Feed PRIMARY KEY (title))");
+    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
