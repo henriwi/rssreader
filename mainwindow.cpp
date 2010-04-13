@@ -39,6 +39,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
     timer->start(300000);          //Updates every 5 minutes
 
+    progressDialog = new QProgressDialog(tr("Downloading feed..."), tr("Cancel"), 0, 100, this);
+    progressDialog->setWindowModality(Qt::WindowModal);
+    connect(&http, SIGNAL(dataReadProgress(int,int)), this, SLOT(downloadFeedProgress(int,int)));
+
     //setWindowState(Qt::WindowMaximized);
 
 }
@@ -305,5 +309,19 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
         show();
         break;
     }
+}
+
+void MainWindow::downloadFeedProgress(int done, int total)
+{
+    progressDialog->setMaximum(total);
+    progressDialog->setValue(done);
+}
+
+void MainWindow::showErrorMessageAndCloseProgressDialog()
+{
+    progressDialog->close();
+    QMessageBox::warning(this, tr("Downloaderror"), tr("Was not able to download the feed. "
+                                                       "Please make sure you have entered a valid feed-adress."),
+                         QMessageBox::Ok);
 }
 
