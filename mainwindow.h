@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#define UPDATE_FREQUENCY 3000000
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSqlQuery>
@@ -59,6 +60,8 @@ private:
     void showErrorMessageAndCloseProgressDialog();
     void createTrayIcon();
     void showSystemTrayIconMessage();
+    QTextEdit showAllFeedsInRssView();
+    QTextEdit showFeedForSelectedUrlInRssView(QUrl url);
 
 private slots:
     void on_searchButton_clicked();

@@ -30,17 +30,14 @@ MainWindow::MainWindow(QWidget *parent) :
     createConnection();
     xmlParser = new XMLParser;
 
-
-    quitAction = new QAction(tr("Quit"), this);
-
     setWindowIcon(QIcon(":/img/windowIcon.png"));
 
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+
     createTrayIcon();
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateRss()));
-    timer->start(300000);
+    timer->start(UPDATE_FREQUENCY);
 
     connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -85,13 +82,17 @@ void MainWindow::showContextMenu(QPoint eventPosition)
 
 void MainWindow::createActions()
 {
-    deleteAct = new QAction (tr("&Delete"), this);
-    deleteAct->setStatusTip(tr("Delete URL"));
+    deleteAct = new QAction (tr("Delete"), this);
+    deleteAct->setToolTip(tr("Delete the selected URL"));
     connect(deleteAct, SIGNAL(triggered()), this, SLOT(deleteFeed()));
 
-    updateAct = new QAction (tr("&Update"), this);
-    updateAct->setStatusTip(tr("Update URL"));
+    updateAct = new QAction (tr("Update"), this);
+    updateAct->setToolTip(tr("Update all the feeds"));
     connect(updateAct, SIGNAL(triggered()), this, SLOT(updateRss()));
+
+    quitAction = new QAction(tr("Quit"), this);
+    quitAction->setToolTip(tr("Exit RSS-reader"));
+    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
 void MainWindow::on_addButton_clicked()
@@ -270,7 +271,7 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
     else {
         xml.addData(http.readAll());
         xmlParser->parseXml(&xml, query, &url);
-        progressDialog->close();
+        progressDialog->hide();
         showSystemTrayIconMessage();
     }    
     updateTreeview();
@@ -288,12 +289,9 @@ void MainWindow::rssLinkedClicked(QUrl url)
 void MainWindow::finished(int id, bool error)
 {
     if (error) {
-        QMessageBox::warning(this, tr("Downloaderror"), tr("Was not able to download the feed. "
-                                                           "Please make sure you have entered a valid feed-adress."),
+        QMessageBox::warning(this, tr("Downloaderror i finished"), tr("%1Was not able to download the feed. "
+                                                           "Please make sure you have entered a valid feed-adress.").arg(http.errorString()),
                              QMessageBox::Ok);
-    }
-    else if (id == connectionId) {
-
     }
 }
 
@@ -344,8 +342,8 @@ void MainWindow::downloadFeedProgress(int done, int total)
 
 void MainWindow::showErrorMessageAndCloseProgressDialog()
 {
-    progressDialog->close();
-    QMessageBox::warning(this, tr("Downloaderror"), tr("Was not able to download the feed. "
+    progressDialog->hide();
+    QMessageBox::warning(this, tr("Downloaderror i showErrorMessageAndCLose..."), tr("Was not able to download the feed. "
                                                        "Please make sure you have entered a valid feed-adress."),
                          QMessageBox::Ok);
 }

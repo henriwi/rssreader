@@ -44,6 +44,9 @@
      <property name="toolTip">
       <string>Displays the feed</string>
      </property>
+     <property name="openLinks">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QLabel" name="urlLabel">
      <property name="geometry">
@@ -163,7 +166,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Feed list</string>
+     <string>Subscriptions</string>
     </property>
     <widget class="QTreeWidget" name="treeWidget">
      <property name="geometry">
