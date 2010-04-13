@@ -5,11 +5,12 @@ Feed::Feed()
 
 }
 
-Feed::Feed(QString title, QString content, QString link, QString date)
+Feed::Feed(QString title, QString content, QString link, QString linkUrl, QString date)
 {
     this->_title = title;
     this->_content = content;
     this->_link = link;
+    this->_linkUrl = linkUrl;
     this->_date = date;
 }
 
@@ -26,6 +27,11 @@ QString Feed::content()
 QString Feed::link()
 {
     return _link;
+}
+
+QString Feed::linkUrl()
+{
+    return _linkUrl;
 }
 
 QString Feed::date()
@@ -48,6 +54,11 @@ void Feed::setLink(QString link)
     this->_link = link;
 }
 
+void Feed::setLinkUrl(QString linkUrl)
+{
+    this->_linkUrl = linkUrl;
+}
+
 void Feed::setDate(QString date)
 {
     this->_date = date;
@@ -55,5 +66,5 @@ void Feed::setDate(QString date)
 
 QString Feed::toString()
 {
-    return _title + "<p>" + _date + "</p>" + _content + "<p>" + _link + "</p>";
+    return _title + "<p>" + _date + "</p>" + _content + "<p>" + _link + "<p>" +  _linkUrl + "</p>";
 }

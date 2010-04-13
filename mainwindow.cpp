@@ -192,7 +192,7 @@ bool MainWindow::createConnection()
 void MainWindow::setupDatabase()
 {
     query = new QSqlQuery;
-    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
+    query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date varchar, link varchar, linkUrl varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
@@ -265,6 +265,17 @@ void MainWindow::readData(const QHttpResponseHeader &resp)
 void MainWindow::rssLinkedClicked(QUrl url)
 {
     QDesktopServices::openUrl(url);
+    query->prepare("UPDATE Feed SET unread=NULL WHERE linkUrl=:linkUrl");
+    query->bindValue(":linkUrl", url.toString());
+    query->exec();
+    updateTreeview();
+
+    /*ui->rssEdit->setText(url.toString());
+    query->exec("SELECT link FROM Feed");
+    while (query->next())
+    {
+        ui->rssEdit->setPlainText(query->value(0).toString());
+    }*/
 }
 
 void MainWindow::finished(int id, bool error)

@@ -14,6 +14,7 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
     QString content = "";
     QString date = "";
     QString link = "";
+    QString linkUrl = "";
 
     while (!xml->atEnd()) {
         xml->readNext();
@@ -22,7 +23,7 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
         }
         else if (xml->isEndElement()) {
             if(xml->name() == "item") {
-                Feed feed(title, content, link, date);
+                Feed feed(title, content, link, linkUrl, date);
                 feeds.append(feed);
             }
         }
@@ -36,6 +37,7 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
             }
             else if (currentTag == "link") {
                 link = "<a href='" + xml->text().toString()+ "'>" + tr("Read more here") + "</a>";
+                linkUrl = xml->text().toString();
             }
             else if (currentTag == "pubDate" || currentTag == "date") {
                 date = "<p style=\"font-style:italic;\">" + xml->text().toString() + "</p>";
@@ -44,12 +46,13 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
     }
 
     foreach(Feed feed, feeds) {
-        query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :intUnread)");
+        query->prepare("INSERT INTO Feed (url, title, content, date, link, linkUrl, unread) VALUES (:stringUrl, :stringTitle, :stringContent, :stringDate, :stringLink, :stringLinkUrl, :intUnread)");
         query->bindValue(":stringUrl", url->toString());
         query->bindValue(":stringTitle", feed.title());
         query->bindValue(":stringContent", feed.content());
         query->bindValue(":stringDate", feed.date());
         query->bindValue(":stringLink", feed.link());
+        query->bindValue(":stringLinkUrl", feed.linkUrl());
         query->bindValue(":intUnread", 1);
         query->exec();
     }
