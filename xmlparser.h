@@ -5,6 +5,7 @@
 #include <QXmlStreamReader>
 #include <QtGui>
 #include <QSqlQuery>
+#include <QHttp>
 #include "feed.h"
 
 class XMLParser : public QObject
@@ -12,7 +13,7 @@ class XMLParser : public QObject
 Q_OBJECT
 public:
     explicit XMLParser(QObject *parent = 0);
-    void parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url);
+    void parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url, QHttp* http);
 
 signals:
 

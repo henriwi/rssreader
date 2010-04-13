@@ -8,7 +8,7 @@ XMLParser::XMLParser(QObject *parent) :
 
 }
 
-void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
+void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url, QHttp* http)
 {
     QString title = "";
     QString content = "";
@@ -32,6 +32,7 @@ void XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
             }
             else if(currentTag == "description") {
                 content = xml->text().toString();
+                //content = xml->readElementText(QXmlStreamReader::IncludeChildElements);
             }
             else if (currentTag == "link") {
                 link = "<a href='" + xml->text().toString()+ "'>" + tr("Read more here") + "</a>";

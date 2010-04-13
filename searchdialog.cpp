@@ -29,7 +29,7 @@ SearchDialog::SearchDialog(QWidget *parent, QString query) :
     connect(view, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
     connect(view, SIGNAL(loadFinished(bool)), this, SLOT(showSearchResults(bool)));
 
-    progressDialog = new QProgressDialog(tr("Searching after feeds..."), tr("Abort"), 0, 100, this);
+    progressDialog = new QProgressDialog(tr("Searching after feeds..."), tr("Cancel"), 0, 100, this);
     progressDialog->setWindowTitle(tr("Searching"));
     progressDialog->setMinimum(0);
     progressDialog->setMaximum(100);
