@@ -46,8 +46,7 @@ bool XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
                 content = xml->text().toString();
             }
             else if (currentTag == "link") {
-                link = "<a href='" + xml->text().toString()+ "'>" + tr("Read more here") + "</a>";
-                linkUrl = xml->text().toString();
+                link = xml->text().toString();
             }
             else if (currentTag == "pubDate" || currentTag == "date") {
                 date = extractAndParseDate(xml->text().toString());
@@ -59,14 +58,13 @@ bool XMLParser::parseXml(QXmlStreamReader* xml, QSqlQuery *query, QUrl *url)
         return false;
     }
 
-    foreach(Feed feed, feeds) {
-        query->prepare("INSERT INTO Feed (url, title, content, date, link, linkUrl, unread) VALUES (:stringUrl, :stringTitle, :stringContent, DATETIME(:stringDate), :stringLink, :stringLinkUrl, :intUnread)");
+    foreach (Feed feed, feeds) {
+        query->prepare("INSERT INTO Feed (url, title, content, date, link, unread) VALUES (:stringUrl, :stringTitle, :stringContent, DATETIME(:stringDate), :stringLink, :intUnread)");
         query->bindValue(":stringUrl", url->toString());
         query->bindValue(":stringTitle", feed.title().trimmed());
         query->bindValue(":stringContent", feed.content().trimmed());
         query->bindValue(":stringDate", feed.date().trimmed());
         query->bindValue(":stringLink", feed.link().trimmed());
-        query->bindValue(":stringLinkUrl", feed.linkUrl().trimmed());
         query->bindValue(":intUnread", 1);
         query->exec();
     }

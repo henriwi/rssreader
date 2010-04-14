@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
     _progressDialog = new QProgressDialog(tr("Downloading feed..."), 0, 0, 0, this);
+    _progressDialog->setWindowTitle(tr("RSS-Reader"));
     _progressDialog->setWindowModality(Qt::WindowModal);
 }
 
@@ -98,16 +99,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::retranslateUi()
 {
     setWindowTitle(tr("RSS-Reader"));;
-    _progressDialog->setWindowTitle(tr("Downloading feed..."));
+    _progressDialog->setLabelText(tr("Downloading feed..."));
     _updateAct->setText(tr("Update"));
     _quitAction->setText(tr("Quit"));
+    ui->feedView->clear();
+    updateTreeview();
 }
 
 void MainWindow::showContextMenu(QPoint eventPosition)
 {
     QPoint globalPos = ui->treeWidget->mapToGlobal(eventPosition);
 
-    if(ui->treeWidget->itemAt(eventPosition)) {
+    if (ui->treeWidget->itemAt(eventPosition)) {
         QMenu menu(ui->treeWidget);
         menu.addAction(_updateAct);
         menu.addAction(_deleteAct);
@@ -150,7 +153,7 @@ bool MainWindow::createConnection()
 void MainWindow::setupDatabase()
 {
     _query = new QSqlQuery;
-    _query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date datetime, link varchar, linkUrl varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
+    _query->exec("CREATE TABLE IF NOT EXISTS Feed (url varchar, title varchar UNIQUE NOT NULL, content varchar, date datetime, link varchar, unread integer , CONSTRAINT Feed PRIMARY KEY (title))");
     updateTreeview();
 }
 
@@ -296,28 +299,35 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
     if (item->text(column) == "All" || item->text(column) == "Alle") {
         ui->urlLabel->setText(tr("All feeds ordered by date (max 20)"));
 
-        if(_showUnreadAndReadFeeds) {
-            _query->exec("SELECT title, date, content, link FROM Feed ORDER BY date DESC LIMIT 20");
+        if (_showUnreadAndReadFeeds) {
+            _query->exec("SELECT title, date, content, link, unread FROM Feed ORDER BY date DESC LIMIT 20");
         }
         else {
-            _query->exec("SELECT title, date, content, link FROM Feed WHERE unread = 1 ORDER BY date DESC LIMIT 20");
+            _query->exec("SELECT title, date, content, link, unread FROM Feed WHERE unread = 1 ORDER BY date DESC LIMIT 20");
         }
 
         while (_query->next())  {
             output.append(_query->value(0).toString());
             output.append(_query->value(1).toString());
             output.append(_query->value(2).toString());
-            output.append(_query->value(3).toString());
+
+            // If the feed has been read, change the font-color
+            if (!_query->value(4).toInt()) {
+                output.append("<a style=\"color: #363636;\" href='" + _query->value(3).toString() + "'>" + tr("Read more here") + "</a>");
+            }
+            else {
+                output.append("<a href='" + _query->value(3).toString() + "'>" + tr("Read more here") + "</a>");
+            }
         }
     }
     else {
         ui->urlLabel->setText(url.toString());
 
-        if(_showUnreadAndReadFeeds) {
-            _query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url ORDER BY date DESC");
+        if (_showUnreadAndReadFeeds) {
+            _query->prepare("SELECT title, date, content, link, unread FROM Feed WHERE url = :url ORDER BY date DESC");
         }
         else {
-            _query->prepare("SELECT title, date, content, link, linkUrl, unread FROM Feed WHERE url = :url AND unread = 1 ORDER BY date DESC");
+            _query->prepare("SELECT title, date, content, link, unread FROM Feed WHERE url = :url AND unread = 1 ORDER BY date DESC");
         }
 
         _query->bindValue(":url", url.toString());
@@ -329,11 +339,11 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
             output.append(_query->value(2).toString());
 
             // If the feed has been read, change the font-color
-            if(!_query->value(5).toInt()) {
-                output.append("<a style=\"color: #363636;\" href='" + _query->value(4).toString() + "'>" + tr("Read more here") + "</a>");
+            if (!_query->value(4).toInt()) {
+                output.append("<a style=\"color: #363636;\" href='" + _query->value(3).toString() + "'>" + tr("Read more here") + "</a>");
             }
             else {
-                output.append(_query->value(3).toString());
+                output.append("<a href='" + _query->value(3).toString() + "'>" + tr("Read more here") + "</a>");
             }
         }
     }
@@ -344,8 +354,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem* item, int column)
 void MainWindow::rssLinkedClicked(QUrl url)
 {
     QDesktopServices::openUrl(url);
-    _query->prepare("UPDATE Feed SET unread=NULL WHERE linkUrl=:linkUrl");
-    _query->bindValue(":linkUrl", url.toString());
+    _query->prepare("UPDATE Feed SET unread=NULL WHERE link=:link");
+    _query->bindValue(":link", url.toString());
     _query->exec();
     updateTreeview();
 }
@@ -364,7 +374,7 @@ void MainWindow::on_searchButton_clicked()
 {
     SearchDialog searchdialog(this, ui->urlEdit->text());
 
-    if(searchdialog.exec() == QDialog::Accepted) {
+    if (searchdialog.exec() == QDialog::Accepted) {
         QUrl url = searchdialog.feedUrl();
         addUrl(url);
     }
@@ -412,6 +422,8 @@ void MainWindow::showAllFeeds()
     ui->actionShow_all_feeds->setChecked(true);
     ui->actionShow_only_unread_feeds->setCheckable(false);
     _showUnreadAndReadFeeds = true;
+    ui->feedView->clear();
+    updateTreeview();
 }
 
 void MainWindow::showOnlyUnreadFeeds()
@@ -419,6 +431,8 @@ void MainWindow::showOnlyUnreadFeeds()
     ui->actionShow_only_unread_feeds->setCheckable(true);
     ui->actionShow_all_feeds->setChecked(false);
     _showUnreadAndReadFeeds = false;
+    ui->feedView->clear();
+    updateTreeview();
 }
 
 void MainWindow::showAbout()

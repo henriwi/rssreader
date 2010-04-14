@@ -111,8 +111,8 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="mainwindow.ui" line="336"/>
-        <location filename="mainwindow.cpp" line="102"/>
-        <location filename="mainwindow.cpp" line="124"/>
+        <location filename="mainwindow.cpp" line="103"/>
+        <location filename="mainwindow.cpp" line="127"/>
         <source>Update</source>
         <translation>Oppdater</translation>
     </message>
@@ -174,59 +174,60 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="mainwindow.cpp" line="14"/>
-        <location filename="mainwindow.cpp" line="100"/>
+        <location filename="mainwindow.cpp" line="56"/>
+        <location filename="mainwindow.cpp" line="101"/>
         <source>RSS-Reader</source>
         <translation>RSS-leser</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="55"/>
-        <location filename="mainwindow.cpp" line="101"/>
+        <location filename="mainwindow.cpp" line="102"/>
         <source>Downloading feed...</source>
         <translation>Laster ned feed...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="89"/>
+        <location filename="mainwindow.cpp" line="90"/>
         <source>Information</source>
         <translation>Informasjon</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="90"/>
+        <location filename="mainwindow.cpp" line="91"/>
         <source>The program will keep running in the system tray. Right click on the system tray icon and choose quit to exit.</source>
         <translation>Programmet vil fortsette å kjøre i systemstatuslinjen. Høyreklikk å velg avslutt for å lukke.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="120"/>
+        <location filename="mainwindow.cpp" line="123"/>
         <source>Delete</source>
         <translation>Slett</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="121"/>
+        <location filename="mainwindow.cpp" line="124"/>
         <source>Delete the selected URL</source>
         <translation>Slett den valge URLen</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="125"/>
+        <location filename="mainwindow.cpp" line="128"/>
         <source>Update all the feeds</source>
         <translation>Oppdater alle feedene</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="103"/>
-        <location filename="mainwindow.cpp" line="128"/>
+        <location filename="mainwindow.cpp" line="104"/>
+        <location filename="mainwindow.cpp" line="131"/>
         <source>Quit</source>
         <translation>Avslutt</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="129"/>
+        <location filename="mainwindow.cpp" line="132"/>
         <source>Exit RSS-reader</source>
         <translation>Lukk RSS-leser</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="138"/>
+        <location filename="mainwindow.cpp" line="141"/>
         <source>Cannot open database</source>
         <translation>Kan ikke åpne databasen</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="139"/>
+        <location filename="mainwindow.cpp" line="142"/>
         <source>Unable to establish a database connection.
 This application needs SQLite support. Please read the Qt SQL driver documentation for more information
 
@@ -241,63 +242,66 @@ Denne applikasjonen trenger støtte for SQLite. Vennligst les QT SQL driver doku
 Trykk på ok for å avslutte.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="176"/>
+        <location filename="mainwindow.cpp" line="179"/>
         <source>Not valid URL</source>
         <translation>Ikke gyldig URL</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="177"/>
+        <location filename="mainwindow.cpp" line="180"/>
         <source>The URL is not valid,
 The URL has to start with http, https or ftp.</source>
         <translation>URLen er ikke gyldig.
 Den må starte med http, https eller ftp.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="205"/>
+        <location filename="mainwindow.cpp" line="208"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="292"/>
+        <location filename="mainwindow.cpp" line="300"/>
         <source>All feeds ordered by date (max 20)</source>
         <translation>Alle feeder sortert etter dato (maks 20)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="328"/>
+        <location filename="mainwindow.cpp" line="316"/>
+        <location filename="mainwindow.cpp" line="319"/>
+        <location filename="mainwindow.cpp" line="343"/>
+        <location filename="mainwindow.cpp" line="346"/>
         <source>Read more here</source>
         <translation>Les mer her</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="245"/>
-        <location filename="mainwindow.cpp" line="352"/>
-        <location filename="mainwindow.cpp" line="388"/>
+        <location filename="mainwindow.cpp" line="248"/>
+        <location filename="mainwindow.cpp" line="367"/>
+        <location filename="mainwindow.cpp" line="403"/>
         <source>Error</source>
         <translation>Feil</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="245"/>
-        <location filename="mainwindow.cpp" line="352"/>
-        <location filename="mainwindow.cpp" line="388"/>
+        <location filename="mainwindow.cpp" line="248"/>
+        <location filename="mainwindow.cpp" line="367"/>
+        <location filename="mainwindow.cpp" line="403"/>
         <source>Was not able to download the feed. Please make sure you have entered a valid feed-adress.</source>
         <translation>Klarte ikke å laste ned feeden. Vennligst sjekk at du har skrevet inn en gyldig feed-adresse.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="399"/>
+        <location filename="mainwindow.cpp" line="414"/>
         <source>Feeds updated</source>
         <translation>Feedene oppdatert</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="400"/>
+        <location filename="mainwindow.cpp" line="415"/>
         <source>Feeds were updated, you have %1 unread feeds</source>
         <translation>Feedene ble oppdatert, du har %1 uleste feed</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="421"/>
+        <location filename="mainwindow.cpp" line="440"/>
         <source>About RSS-Reader</source>
         <translation>Om RSS-leser</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="421"/>
+        <location filename="mainwindow.cpp" line="440"/>
         <source>RSS-Reader is written by Henrik Wingerei and Marit Olsen.</source>
         <translation>RSS-leser er skrevet av Henrik Wingerei and Marit Olsen.</translation>
     </message>
@@ -305,47 +309,47 @@ Den må starte med http, https eller ftp.</translation>
 <context>
     <name>SearchDialog</name>
     <message>
-        <location filename="searchdialog.cpp" line="7"/>
+        <location filename="searchdialog.cpp" line="6"/>
         <source>Search after feeds</source>
         <translation>Søk etter feeder</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="13"/>
+        <location filename="searchdialog.cpp" line="12"/>
         <source>Search</source>
         <translation>Søk</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="32"/>
+        <location filename="searchdialog.cpp" line="31"/>
         <source>Searching after feeds...</source>
         <translation>Søker etter feeder...</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="33"/>
+        <location filename="searchdialog.cpp" line="32"/>
         <source>Searching</source>
         <translation>Søking</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="74"/>
+        <location filename="searchdialog.cpp" line="73"/>
         <source>Add feed</source>
         <translation>Legg til feed</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="79"/>
+        <location filename="searchdialog.cpp" line="78"/>
         <source>Results for &quot;%1&quot;:</source>
         <translation>Resultater for &quot;%1&quot;:</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="83"/>
+        <location filename="searchdialog.cpp" line="82"/>
         <source>No results found for &quot;%1&quot;</source>
         <translation>Ingen resultater funnet for &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="88"/>
+        <location filename="searchdialog.cpp" line="87"/>
         <source>Searcherror</source>
         <translation>Søkefeil</translation>
     </message>
     <message>
-        <location filename="searchdialog.cpp" line="88"/>
+        <location filename="searchdialog.cpp" line="87"/>
         <source>Was not able to perform the search. Please try again.</source>
         <translation>Kunne ikke utføre søket. Vennligst prøv igjen.</translation>
     </message>
@@ -353,9 +357,8 @@ Den må starte med http, https eller ftp.</translation>
 <context>
     <name>XMLParser</name>
     <message>
-        <location filename="xmlparser.cpp" line="49"/>
         <source>Read more here</source>
-        <translation>Les mer her</translation>
+        <translation type="obsolete">Les mer her</translation>
     </message>
 </context>
 </TS>
